@@ -10,6 +10,7 @@ function Main() {
   const [photo, setPhoto] = useState<File>();
   // const [photoUrl, setPhotoUrl] = useState<string>();
   const [model, setModel] = useState<GraphModel>();
+  const [counter, setCounter] = useState<number>(0);
 
   console.log(photo);
 
@@ -38,8 +39,10 @@ function Main() {
     setPhoto(newPhoto);
   };
 
+  const increaseCounter = () => setCounter((cur) => cur + 1);
+
   return (
-    <div>
+    <div style={{ padding: "0.5rem" }}>
       <h2>Personal Shelf</h2>
       <p>Model state: {model ? "Loaded!" : "Loading..."}</p>
       <p>
@@ -53,10 +56,13 @@ function Main() {
       <button onClick={executeDev} type="button">
         Execute dev
       </button>
+      <button onClick={increaseCounter} type="button">
+        Increase Counter
+      </button>
       {/* <div>
         <img src={photoUrl} alt="From camera"></img>
       </div> */}
-      <TensorDev image={photo} priceTagModel={model} />
+      <TensorDev counter={counter} image={photo} priceTagModel={model} />
     </div>
   );
 }
