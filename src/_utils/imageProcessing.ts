@@ -138,6 +138,13 @@ const executeModel = async (model: GraphModel, canvas: HTMLCanvasElement) => {
   return result;
 };
 
+/**
+ * Draw bounding boxes over canvas. Not used function, kept just for debugging
+ * @param tensorRanks
+ * @param canvas
+ * @param ctx
+ * @returns
+ */
 const drawPredictions = (
   tensorRanks: Tensor<Rank>[] | Tensor<Rank>,
   canvas: HTMLCanvasElement,

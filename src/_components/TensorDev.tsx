@@ -5,10 +5,12 @@ import {
   drawPredictions,
   executeModel,
 } from "_utils/imageProcessing";
+import { normalizeRoiCoords, tensorsToRois } from "_utils/predictionProcessing";
 
 // const tf = require("@tensorflow/tfjs");
 
 const MODEL_SIZE = 640;
+const SCORE_MIN = 0.25;
 
 type Props = {
   image: File | undefined;
@@ -34,15 +36,41 @@ export default function TensorDev(props: Props) {
       cropImageToCanvas(image, canvas, ctx);
 
       const tensorRanks = await executeModel(priceTagModel, canvas);
-      // drawPredictions(tensorRanks, canvas, ctx);
+      drawPredictions(tensorRanks, canvas, ctx);
 
-      if (Array.isArray(tensorRanks)) {
-        const [boxes, scores, classes, validDetections] = tensorRanks;
-        const validDetectionsData = validDetections.dataSync()[0];
-        const validBoxes = boxes.dataSync().slice(0, validDetectionsData * 4);
-
-        console.log(validBoxes);
+      if (!Array.isArray(tensorRanks)) {
+        throw new Error("Output of predictions should be array");
+        console.error("tensorRanks is", tensorRanks);
       }
+
+      let roiList = tensorsToRois(tensorRanks);
+      roiList.filter((roi) => roi.score > SCORE_MIN);
+      
+      console.log("image.naturalHeight", image.naturalHeight);
+
+      console.log(roiList[0]);
+
+      roiList = roiList.map((roi) =>
+        normalizeRoiCoords(roi, image.naturalHeight)
+      );
+
+      console.log(roiList[0]);
+
+      //   const [
+      //     boxesTensor,
+      //     scoresTensor,
+      //     classesTensor,
+      //     validDetectionsTensor,
+      //   ] = tensorRanks;
+      //   const validDetections = validDetectionsTensor.dataSync()[0];
+      //   const validBoxes = boxesTensor.dataSync().slice(0, validDetections * 4);
+      //   const validScores = scoresTensor.dataSync();
+      //   const validClasses = classesTensor.dataSync();
+
+      //   console.log(validBoxes);
+      //   console.log(validScores);
+      //   console.log(validClasses);
+      // }
     }
   };
 
