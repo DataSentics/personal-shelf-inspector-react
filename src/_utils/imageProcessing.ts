@@ -5,11 +5,12 @@ import {
   GraphModel,
   image,
   Rank,
+  reshape,
   Tensor,
   tidy,
 } from "@tensorflow/tfjs";
+import { reshapeTensorArrayOutput, reshapeTensorSingleOutput } from "./tensor";
 
-const DEFAULT_MODEL_SIZE = 640;
 const CANVAS_BG_COLOR = "#000000";
 // const CANVAS_FONT = "16px sans-serif";
 
@@ -125,17 +126,42 @@ const tensorFromCanvas = (
       .expandDims(0)
   );
 
-const getModelSize = (model: GraphModel): [number, number] => {
-  const DMS = DEFAULT_MODEL_SIZE;
-
-  return (model.inputs[0].shape?.slice(1, 3) as [number, number]) || [DMS, DMS];
+const getModelSize = (
+  model: GraphModel,
+  backupDefaultSize: number
+): [number, number] => {
+  // backupDefaultSize is used if model doesn't contain this info. This shouldn't
+  // happen, but typescript would be unhappy otherwise
+  const BDS = backupDefaultSize;
+  return (model.inputs[0].shape?.slice(1, 3) as [number, number]) || [BDS, BDS];
 };
 
-const executeModel = async (model: GraphModel, canvas: HTMLCanvasElement) => {
-  const [modelWidth, modelHeight] = getModelSize(model);
+/**
+ * Main function for executing models on image(html canvas)
+ *
+ * @param model
+ * @param canvas
+ * @param minScore
+ */
+const executeImageModel = async (
+  model: GraphModel,
+  canvas: HTMLCanvasElement,
+  minScore = 0
+) => {
+  const [modelWidth, modelHeight] = getModelSize(model, canvas.width);
+  console.log("canvas.width", canvas.width);
+
   const tensor = tensorFromCanvas(canvas, modelWidth, modelHeight);
-  const result = await model.executeAsync(tensor);
-  return result;
+  const tensorResult = await model.executeAsync(tensor);
+
+  console.log("tensorResult", tensorResult);
+
+  // const { boxes, scores, validDetections }
+  const a = Array.isArray(tensorResult)
+    ? reshapeTensorArrayOutput(tensorResult, minScore)
+    : await reshapeTensorSingleOutput(tensorResult, minScore);
+  // console.log(boxes, scores, validDetections);
+  console.log(a);
 };
 
 /**
@@ -153,6 +179,8 @@ const drawPredictions = (
   // const font = "16px sans-serif";
   // ctx.font = font;
   // ctx.textBaseline = "top";
+  console.log("tensorRanks", tensorRanks);
+
   if (!Array.isArray(tensorRanks)) {
     console.error("TensorRanks has to be array");
     console.error(tensorRanks);
@@ -184,4 +212,9 @@ const drawPredictions = (
 };
 
 // export const x = 1;
-export { tensorFromCanvas, cropImageToCanvas, drawPredictions, executeModel };
+export {
+  tensorFromCanvas,
+  cropImageToCanvas,
+  drawPredictions,
+  executeImageModel,
+};

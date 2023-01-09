@@ -3,8 +3,9 @@ import { GraphModel, loadGraphModel } from "@tensorflow/tfjs";
 // import { io } from "@tensorflow/tfjs-core";
 
 import { Camera, TensorDev } from "_components";
+import { MODEL_PRICETAG_PATH } from "_constants";
 
-const weightsPriceTags = "/web_models/pricetags/model.json";
+// const weightsPriceTags = "/web_models/pricetags/model.json";
 
 function Main() {
   const [photo, setPhoto] = useState<File>();
@@ -15,7 +16,7 @@ function Main() {
   console.log(photo);
 
   useEffect(() => {
-    loadGraphModel(weightsPriceTags).then((mdl) => setModel(mdl));
+    loadGraphModel(MODEL_PRICETAG_PATH).then((mdl) => setModel(mdl));
   }, []);
 
   const onImageChange = () => {
@@ -53,16 +54,16 @@ function Main() {
       <Camera onPhotoTaken={onPhotoTaken}>
         <button>Take photo</button>
       </Camera>
-      <button onClick={executeDev} type="button">
+      {/* <button onClick={executeDev} type="button">
         Execute dev
       </button>
       <button onClick={increaseCounter} type="button">
         Increase Counter
-      </button>
+      </button> */}
       {/* <div>
         <img src={photoUrl} alt="From camera"></img>
       </div> */}
-      <TensorDev counter={counter} image={photo} priceTagModel={model} />
+      <TensorDev image={photo} priceTagModel={model} />
     </div>
   );
 }

@@ -12,7 +12,7 @@ export function tensorsToRois(tensorRanks: Array<Tensor<Rank>>): Array<Roi> {
   const roiList: Roi[] = [];
 
   for (let i = 0; i < validDetections; i += 1) {
-    const cordArr = validBoxes.slice(i * 4, i + 4);
+    const cordArr = validBoxes.slice(i * 4, i * 4 + 4);
     const coords: RectCoords = [cordArr[0], cordArr[1], cordArr[2], cordArr[3]];
     const score = validScores[i];
     roiList.push({ coords, score });
