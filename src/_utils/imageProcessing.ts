@@ -149,19 +149,18 @@ const executeImageModel = async (
   minScore = 0
 ) => {
   const [modelWidth, modelHeight] = getModelSize(model, canvas.width);
-  console.log("canvas.width", canvas.width);
+  // console.log("canvas.width", canvas.width);
 
   const tensor = tensorFromCanvas(canvas, modelWidth, modelHeight);
   const tensorResult = await model.executeAsync(tensor);
 
-  console.log("tensorResult", tensorResult);
-
-  // const { boxes, scores, validDetections }
-  const a = Array.isArray(tensorResult)
-    ? reshapeTensorArrayOutput(tensorResult, minScore)
+  const { boxes, scores, validDetections } = Array.isArray(tensorResult)
+    ? await reshapeTensorArrayOutput(tensorResult)
     : await reshapeTensorSingleOutput(tensorResult, minScore);
-  // console.log(boxes, scores, validDetections);
-  console.log(a);
+
+  console.log(boxes, scores, validDetections);
+
+  return { boxes, scores, validDetections };
 };
 
 /**

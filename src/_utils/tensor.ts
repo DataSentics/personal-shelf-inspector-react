@@ -1,5 +1,5 @@
-import { image, Rank, Tensor, TypedArray } from "@tensorflow/tfjs";
-import { isTypedArray } from "util/types";
+import { image, Rank, Tensor } from "@tensorflow/tfjs";
+// import { isTypedArray } from "util/types";
 
 const MIN_SINGLE_RESULT_LENGTH = 6; // this is minimum, x,y,w,h,score,classScore(s)
 const MAX_NUM_OF_RESULTS = 6300;
@@ -8,13 +8,13 @@ const MAX_NONMAX_SUPRESS_RESULTS = 1000; // some random number at the moment
 
 type Coords = [number, number, number, number];
 type ReshapedOutput = {
-  boxes: number[][] | TypedArray[];
-  scores: number[] | TypedArray;
+  boxes: (Float32Array | Int32Array | Uint8Array | number[])[];
+  scores: Float32Array | Int32Array | Uint8Array | number[];
   validDetections: number;
 };
 
 /**
- * Reshape YOLO x,y,w,h coordinates into BoundingBox coordinates (x1,y1,x2,y2)
+ * Convert YOLO x,y,w,h coordinates into BoundingBox coordinates (x1,y1,x2,y2)
  *
  * @returns BoundingBox coordinates [x1,y1,x2,y2]
  */
@@ -22,6 +22,32 @@ function xywh2xyxy(x: number, y: number, w: number, h: number): Coords {
   const wHalf = w / 2;
   const hHalf = h / 2;
   return [x - wHalf, y - hHalf, x + wHalf, y + hHalf];
+}
+
+/**
+ * Reshapre 1d array into 2d array with # elems per row
+ */
+function array1dTo2d<T extends number>(
+  array1d: Array<T> | Float32Array | Int32Array | Uint8Array,
+  elemsPerRow = 4
+): (Float32Array | Int32Array | Uint8Array | Array<T>)[] {
+  // const arr1dFixed = array1d.at()
+  const length = array1d.length;
+  let newLength = length / elemsPerRow;
+  if (newLength % 1 !== 0)
+    console.warn(
+      `array1dTo2d: Given array length '${length}' is not multiple of parameter elemsPerRow=${elemsPerRow}`
+    );
+  newLength = Math.ceil(newLength);
+
+  const result2dArray = [];
+  for (let row = 0; row < newLength; row += 1) {
+    result2dArray.push(
+      array1d.slice(row * elemsPerRow, row * elemsPerRow + elemsPerRow)
+    );
+  }
+
+  return result2dArray;
 }
 
 /**
@@ -37,11 +63,11 @@ export async function reshapeTensorSingleOutput(
   console.debug("Reshaping SINGLE Tensor output");
 
   const numOfResults = tensorRank.shape[1] || MAX_NUM_OF_RESULTS;
-  const resultLength = tensorRank.shape[2] || MIN_SINGLE_RESULT_LENGTH;
   // SingleResultLength: min is 6 if number of model classes is 1
   // - first 4 numbers are coordinates
   // - 5th number is box confidence (score)
   // - 6th to singleResultLength(th) are classes confidences
+  const resultLength = tensorRank.shape[2] || MIN_SINGLE_RESULT_LENGTH;
 
   // Get Data
   const resultRaw = await tensorRank.data();
@@ -110,41 +136,30 @@ export async function reshapeTensorSingleOutput(
  * @param tensorRank result of model.executeAsync()
  */
 export async function reshapeTensorArrayOutput(
-  tensorRanks: Tensor<Rank>[],
-  minScoreIgnored: number
-) {
+  tensorRanks: Tensor<Rank>[]
+  // _minScoreIgnored: number // TODO: this should be used
+): Promise<ReshapedOutput> {
   // :Promise<ReshapedOutput>
   console.debug("Reshaping ARRAY Tensor output");
   const [boxesTensor, scoresTensor, _classesTensor, validDetectionsTensor] =
     tensorRanks;
 
-  // console.log(boxesTensor, scoresTensor, classesTensor, validDetectionsTensor);
-
-  // const validDetections = validDetectionsTensor.dataSync()[0];
-  // const boxes1d = boxesTensor.dataSync().slice(0, validDetections * 4);
-  // const scores = scoresTensor.dataSync().slice(0, validDetections);
-  // const classes = classesTensor.dataSync().slice(0, validDetections);
-
-  const [validDetections, boxes1d, scores] = await Promise.all([
-    validDetectionsTensor.data(),
-    boxesTensor.data(),
-    scoresTensor.data(),
-  ]);
-  // const validDetections = validDetectionsTensor.dataSync()[0];
-  // const boxes1d = boxesTensor.dataSync().slice(0, validDetections * 4);
-  // const scores = scoresTensor.dataSync().slice(0, validDetections);
+  const [validDetectionsResult, boxes1dResult, scoresResult] =
+    await Promise.all([
+      validDetectionsTensor.data(),
+      boxesTensor.data(),
+      scoresTensor.data(),
+    ]);
+  const validDetections = validDetectionsResult[0];
+  const boxes1d = boxes1dResult.slice(0, validDetections * 4);
+  const scores = scoresResult.slice(0, validDetections);
 
   console.log(validDetections, boxes1d, scores);
 
-  // const boxes = [];
-
-  // for (let row = 0; row < validDetections; row += 1) {
-  //   const boundingBox = boxes1d.slice(row * 4, row * 4 + 4);
-  //   boxes.push(boundingBox);
-  // }
+  const boxes = array1dTo2d(boxes1d, 4);
 
   return {
-    boxes: boxesTensor,
+    boxes,
     validDetections,
     scores,
   };

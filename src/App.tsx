@@ -1,7 +1,7 @@
 import Main from "./_screens/Main";
 
 function App() {
-    return <Main />;
+  return <Main />;
 }
 
 export default App;
