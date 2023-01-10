@@ -9,9 +9,17 @@ import {
   Tensor,
   tidy,
 } from "@tensorflow/tfjs";
+import {
+  CANVAS_BG_COLOR,
+  CANVAS_FONT,
+  CANVAS_FONT_COLOR,
+  CANVAS_LINE_WIDTH,
+  CANVAS_STROKE_COLOR,
+} from "_constants";
+import { isValidText } from "./other";
 import { reshapeTensorArrayOutput, reshapeTensorSingleOutput } from "./tensor";
 
-const CANVAS_BG_COLOR = "#000000";
+// const CANVAS_BG_COLOR = "#000000";
 // const CANVAS_FONT = "16px sans-serif";
 
 const cropImageToCanvas = (
@@ -171,43 +179,55 @@ const executeImageModel = async (
  * @returns
  */
 const drawPredictions = (
-  tensorRanks: Tensor<Rank>[] | Tensor<Rank>,
   canvas: HTMLCanvasElement,
-  ctx: CanvasRenderingContext2D
+  ctx: CanvasRenderingContext2D,
+  boxes: (Float32Array | Int32Array | Uint8Array | number[])[],
+  boxesLabels: Float32Array | Int32Array | Uint8Array | number[] | string[]
+  // validDetections: number
 ): void => {
-  // const font = "16px sans-serif";
-  // ctx.font = font;
-  // ctx.textBaseline = "top";
-  console.log("tensorRanks", tensorRanks);
+  ctx.strokeStyle = CANVAS_STROKE_COLOR;
+  ctx.lineWidth = CANVAS_LINE_WIDTH;
+  ctx.fillStyle = CANVAS_STROKE_COLOR;
+  ctx.textBaseline = "top";
+  // const FONT = "16px sans-serif";
 
-  if (!Array.isArray(tensorRanks)) {
-    console.error("TensorRanks has to be array");
-    console.error(tensorRanks);
-    return;
-  }
-  const [boxes, scores, classes, validDetections] = tensorRanks;
-  const boxes_data = boxes.dataSync();
-  // const scores_data = scores.dataSync();
-  // const classes_data = classes.dataSync();
-  const valid_detectionsData = validDetections.dataSync()[0];
-
-  ctx.strokeStyle = "#00FFFF";
-  ctx.lineWidth = 4;
-
-  for (let i = 0; i < valid_detectionsData; ++i) {
-    const [x1, y1, x2, y2] = boxes_data.slice(i * 4, (i + 1) * 4);
+  boxes.forEach((coords, boxIndex) => {
+    const [x1, y1, x2, y2] = coords;
     const canX1 = x1 * canvas.width;
     const canX2 = x2 * canvas.width;
     const canY1 = y1 * canvas.height;
     const canY2 = y2 * canvas.height;
     const width = canX2 - canX1;
     const height = canY2 - canY1;
-    // const klass = names[classes_data[i]];
-    // const score = scores_data[i].toFixed(2);
-    ctx.strokeRect(canX1, canY1, width, height);
-  }
 
-  // Draw the bounding box.
+    // Draw the bounding box.
+    ctx.strokeRect(canX1, canY1, width, height);
+
+    const label = boxesLabels[boxIndex];
+    // Draw the label backgroud, if label exists
+    if (isValidText(label)) {
+      const textWidth = ctx.measureText(label.toString()).width;
+      const textHeight = parseInt(CANVAS_FONT, 10); // base 10
+      const CLW = CANVAS_LINE_WIDTH;
+
+      // ctx.fillStyle = CANVAS_STROKE_COLOR;
+
+      ctx.fillRect(canX1, canY1, textWidth + CLW, textHeight + CLW);
+    }
+  });
+
+  // Draw texts last to ensure they're on top
+  ctx.fillStyle = CANVAS_FONT_COLOR;
+  boxesLabels.forEach((label, boxIndex) => {
+    if (!isValidText(label)) return;
+
+    const [x1, y1] = boxes[boxIndex];
+    const canX1 = x1 * canvas.width;
+    const canY1 = y1 * canvas.height;
+
+    ctx.fillText(label.toString(), canX1, canY1 + CANVAS_LINE_WIDTH);
+  });
+
 };
 
 // export const x = 1;

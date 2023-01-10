@@ -6,8 +6,6 @@ import {
   drawPredictions,
   executeImageModel,
 } from "_utils/imageProcessing";
-import { normalizeRoiCoords, tensorsToRois } from "_utils/predictionProcessing";
-import { guessShelves } from "_utils/shelves";
 
 // const tf = require("@tensorflow/tfjs");
 
@@ -37,38 +35,23 @@ export default function TensorDev(props: Props) {
     if (canvas && priceTagModel && ctx && image) {
       cropImageToCanvas(image, canvas, ctx);
 
-      const tensorRanks = await executeImageModel(
+      const {
+        boxes,
+        scores,
+        validDetections: _asd,
+      } = await executeImageModel(
         priceTagModel,
         canvas,
         // 0
         MODEL_PRICETAG_MIN_SCORE
       );
-      // drawPredictions(tensorRanks, canvas, ctx);
 
-      // if (!Array.isArray(tensorRanks)) {
-      //   throw new Error("Output of predictions should be array");
-      //   console.error("tensorRanks is", tensorRanks);
-      // }
-
-      // let roiList = tensorsToRois(tensorRanks);
-      // roiList.filter((roi) => roi.score > MODEL_PRICETAG_MIN_SCORE);
-
-      // console.log("image.naturalHeight", image.naturalHeight);
-
-      // console.log(roiList[0]);
-
-      // roiList = roiList.map((roi) =>
-      //   normalizeRoiCoords(roi, image.naturalHeight)
-      // );
-
-      // console.log(roiList[0]);
-
-      // const productsOnShelves = guessShelves(
-      //   roiList.map((roi) => ({ pricetag: roi }))
-      // );
-
-      // console.log("-----------------");
-      // console.log(productsOnShelves);
+      drawPredictions(
+        canvas,
+        ctx,
+        boxes,
+        [...scores].map((s) => s.toFixed(2))
+      );
     }
   };
 

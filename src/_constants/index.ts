@@ -13,3 +13,9 @@ export const MODEL_PRICETAG_MIN_SCORE = 0.25;
 
 // NamesAndPricesModel
 // export const MODEL_NAME_PRICE_SIZE = MODEL_SIZES.S_320;
+
+export const CANVAS_BG_COLOR = "#000000";
+export const CANVAS_STROKE_COLOR = "#00FFFF";
+export const CANVAS_LINE_WIDTH = 4;
+export const CANVAS_FONT = "16px sans-serif";
+export const CANVAS_FONT_COLOR = "#000000";
