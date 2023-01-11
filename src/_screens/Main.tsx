@@ -1,51 +1,41 @@
 import { useEffect, useState } from "react";
 import { GraphModel, loadGraphModel } from "@tensorflow/tfjs";
-// import { io } from "@tensorflow/tfjs-core";
 
 import { Camera, TensorDev } from "_components";
-import { MODEL_PRICETAG_PATH } from "_constants";
+import {
+  MODEL_NAME_PRICE_PATH,
+  MODEL_NAME_PRICE_SIZE,
+  MODEL_PRICETAG_PATH,
+} from "_constants";
 
-// const weightsPriceTags = "/web_models/pricetags/model.json";
+const loadingState = (model: GraphModel | undefined) =>
+  model ? "Loaded!" : "Loading...";
 
 function Main() {
   const [photo, setPhoto] = useState<File>();
+  const [priceTagModel, setPriceTagModel] = useState<GraphModel>();
+  const [namePriceModel, setNamePriceModel] = useState<GraphModel>();
   // const [photoUrl, setPhotoUrl] = useState<string>();
-  const [model, setModel] = useState<GraphModel>();
-  const [counter, setCounter] = useState<number>(0);
 
-  console.log(photo);
+  // console.log(photo);
 
   useEffect(() => {
-    loadGraphModel(MODEL_PRICETAG_PATH).then((mdl) => setModel(mdl));
+    loadGraphModel(MODEL_PRICETAG_PATH).then((mdl) => setPriceTagModel(mdl));
+    loadGraphModel(MODEL_NAME_PRICE_PATH).then((mdl) => setNamePriceModel(mdl));
   }, []);
 
-  const onImageChange = () => {
-    // await getDetectedPricetagImages(
-    //   capturedImage,
-    //   findPricetagModel,
-    //   1,
-    //   RESIZE_IMG_320,
-    // );
-    // let [modelWidth, modelHeight] = model?.inputs?[0].shape.slice(1, 3);
-  };
-
-  const executeDev = () => {
-    console.log(model?.inputs[0].shape?.slice(1, 3));
-  };
-
   const onPhotoTaken = (newPhoto: File) => {
-    const objectUrl = URL.createObjectURL(newPhoto);
+    // const objectUrl = URL.createObjectURL(newPhoto);
 
     // setPhotoUrl(objectUrl);
     setPhoto(newPhoto);
   };
 
-  const increaseCounter = () => setCounter((cur) => cur + 1);
-
   return (
     <div style={{ padding: "0.5rem" }}>
       <h2>Personal Shelf</h2>
-      <p>Model state: {model ? "Loaded!" : "Loading..."}</p>
+      <p>PriceTags model: {loadingState(priceTagModel)}</p>
+      <p>Names&Prices model: {loadingState(namePriceModel)}</p>
       <p>
         <label htmlFor="imageFile">
           Upload a photo of shop shelf using button below
@@ -63,7 +53,11 @@ function Main() {
       {/* <div>
         <img src={photoUrl} alt="From camera"></img>
       </div> */}
-      <TensorDev image={photo} priceTagModel={model} />
+      <TensorDev
+        image={photo}
+        priceTagModel={priceTagModel}
+        namePriceModel={namePriceModel}
+      />
     </div>
   );
 }
