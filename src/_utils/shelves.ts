@@ -1,4 +1,4 @@
-import { Product, ProductOnShelf, RectCoords } from "./objects";
+import { Product, ProductOnShelf } from "./shelvesOperations";
 import {
   addAngleToNextPricetag,
   addPriceTagCenter,

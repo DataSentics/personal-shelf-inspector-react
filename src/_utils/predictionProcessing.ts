@@ -1,5 +1,5 @@
 import { Rank, Tensor } from "@tensorflow/tfjs";
-import { RectCoords, Roi } from "./objects";
+import { RectCoords, Roi } from "./shelvesOperations";
 
 export function tensorsToRois(tensorRanks: Array<Tensor<Rank>>): Array<Roi> {
   //   if (Array.isArray(tensorRanks)) {

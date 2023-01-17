@@ -4,7 +4,7 @@ import { GraphModel, loadGraphModel } from "@tensorflow/tfjs";
 import { Camera, TensorDev } from "_components";
 import {
   MODEL_NAME_PRICE_PATH,
-  MODEL_NAME_PRICE_SIZE,
+  // MODEL_NAME_PRICE_SIZE,
   MODEL_PRICETAG_PATH,
 } from "_constants";
 

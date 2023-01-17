@@ -1,40 +1,5 @@
 import { TypedArray } from "@tensorflow/tfjs";
 
-type BoxCoords = [number, number, number, number] | Array<number>; // x1, y1, x2, y2
-
-export type RectCoords = BoxCoords;
-
-type Rectangle = {
-  coords: BoxCoords;
-};
-
-// class Roi implements Rectangle {
-//   coords: RectCoords;
-//   score: number;
-
-//   constructor(coords: RectCoords, score: number) {
-//     this.coords = coords;
-//     this.score = score;
-//   }
-// }
-
-export type Roi = Rectangle & { score: number };
-
-// export type DetectedPriceTag = Roi & {
-//   //   constructor(coords: RectCoords, score: number) {
-//   //     super(coords, score);
-//   //   }
-//   shelfNumber: number;
-// };
-
-export type Product = {
-  pricetag: Roi;
-};
-
-export type ProductOnShelf = Product & {
-  shelfRow: number;
-};
-
 // NEW
 export type BBoxCoords = TypedArray | number[];
 
@@ -69,10 +34,21 @@ export class BBox {
     return [x1, y1, x2, y2];
   }
 
+  /**
+   * Returns true if the bounding box of this element is fully containing given element.
+   * @param {BBox} bbox - the bounding box of the element.
+   * @returns {boolean} - true if the bounding box of the filter is contained within the bounding box of
+   * the element.
+   */
   public wraps(bbox: BBox): boolean {
     const { x1, y1, x2, y2 } = this;
     return x1 <= bbox.x1 && y1 <= bbox.y1 && x2 >= bbox.x2 && y2 >= bbox.y2;
   }
+
+  /**
+   * Returns true if the bounding box of this element is fully contained
+   * within the bounding box of given element.
+   */
   public isWrappedBy(bbox: BBox): boolean {
     const { x1, y1, x2, y2 } = this;
     return x1 >= bbox.x1 && y1 >= bbox.y1 && x2 <= bbox.x2 && y2 <= bbox.y2;
@@ -80,9 +56,9 @@ export class BBox {
 }
 
 enum PriceDetailClass {
-  NAME = 0,
-  PRICE_MAIN = 1,
-  PRICE_SUB = 2,
+  NAME = 2,
+  PRICE_MAIN = 0,
+  PRICE_SUB = 1,
 }
 /**
  * A class that represents a pricetag
@@ -117,14 +93,18 @@ export class PricetagCoords {
 }
 
 /**
- * A class that represents 2 pricetags on different images
- *  It contains the original and collage pricetags.
+ * A class that represents product.
+ * It contains the original and collage pricetags information
  * @param {BBoxCoords} original - The original pricetag bounding box.
  * @param {BBoxCoords} collage - The collage pricetag bounding box.
  */
-export class PricetagMulti {
-  original: PricetagCoords;
-  collage: PricetagCoords;
+export class Product {
+  readonly original: PricetagCoords;
+  readonly collage: PricetagCoords;
+
+  name: string | undefined = undefined;
+  priceMain: string | number | undefined = undefined;
+  priceSub: string | number | undefined = undefined;
 
   constructor(original: BBoxCoords, collage: BBoxCoords) {
     this.original = new PricetagCoords(original);

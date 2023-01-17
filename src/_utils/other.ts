@@ -23,3 +23,27 @@ export function isValidText(value: string | number | undefined) {
 
 //   return descriptor;
 // };
+
+export class PerfMeter {
+  private startTime: number;
+  name: string;
+
+  constructor(name = "PerfMeter") {
+    this.name = name;
+    this.startTime = performance.now();
+  }
+
+  public start(newName?: string) {
+    if (newName) this.name = newName;
+    this.startTime = performance.now();
+  }
+
+  public end() {
+    const endTime = performance.now();
+    const { startTime, name } = this;
+
+    const execTime = Math.round(endTime - startTime);
+    console.log(`${name}: execution time: ${execTime} ms`);
+    return execTime;
+  }
+}

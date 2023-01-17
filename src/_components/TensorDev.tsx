@@ -5,6 +5,7 @@ import {
   CANVAS_BG_COLOR,
   MODEL_NAME_PRICE_SIZE,
   MODEL_PRICETAG_SIZE,
+  OCR_TESSERACT_LANG,
 } from "_constants";
 import { Boxes } from "_types";
 import { getCollageBoxes, denormalizeBoxes } from "_utils/imageCalcs";
@@ -13,7 +14,8 @@ import {
   cropPriceTagToCanvas,
   drawPredictions,
 } from "_utils/imageProcessing";
-import { BBox, PricetagCoords, PricetagMulti } from "_utils/objects";
+import { BBox, PricetagCoords, Product } from "_utils/objects";
+import { PerfMeter } from "_utils/other";
 import { addDetailsToPricetags } from "_utils/pricetags";
 import { executeImageModel } from "_utils/tensor";
 
@@ -28,21 +30,23 @@ export default function TensorDev(props: Props) {
   const { image, priceTagModel, namePriceModel } = props;
   const [imageUrl, setImageUrl] = useState<string>();
   const photoCanvasRef = useRef<HTMLCanvasElement>(null);
-  const namePriceCanvasRef = useRef<HTMLCanvasElement>(null);
+  // const namePriceCanvasRef = useRef<HTMLCanvasElement>(null);
   const imageGeneratorCanvasRef = useRef<HTMLCanvasElement>(null);
   const ocrCanvasRef = useRef<HTMLCanvasElement>(null);
   // const [imgGenSize, setImgGenSize] = useState<Size>({ width: 0, height: 0 });
   // const secondCanvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  const [debugImageUrl, setDebugImageUrl] = useState<string>();
 
   const ocrRef = useRef<Tesseract.Worker>();
 
   useEffect(() => {
     const perform = async () => {
       const worker = await createWorker({
-        logger: (m) => console.log(m),
+        // logger: (m) => console.log(m),
       });
       ocrRef.current = worker;
+      worker.loadLanguage(OCR_TESSERACT_LANG);
     };
     perform();
   }, []);
@@ -71,11 +75,66 @@ export default function TensorDev(props: Props) {
   //   }
   // };
 
-  const readText = async (bbox: number[]) => {
-    await ocrRef.current?.load();
+  const readText = async (bbox: BBox | undefined) => {
     // Loadingg language as 'English'
-    await ocrRef.current?.loadLanguage("eng");
-    await ocrRef.current?.initialize("eng");
+    const ocr = ocrRef.current;
+
+    // const canvas = ocrCanvasRef.current;
+    const ctx = ocrCanvasRef.current?.getContext("2d", { alpha: false });
+    const originalCanvas = imageGeneratorCanvasRef.current;
+
+    if (ctx && originalCanvas && ocr && bbox) {
+      const canvas = ctx.canvas;
+      canvas.width = bbox.width;
+      canvas.height = bbox.height;
+      // canvas.width = 600;
+      // canvas.height = 600;
+
+      // ctx.fillStyle = CANVAS_BG_COLOR;
+      // ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.drawImage(
+        originalCanvas,
+        bbox.x1,
+        bbox.y1,
+        bbox.width,
+        bbox.height,
+        0,
+        0,
+        bbox.width,
+        bbox.height
+      );
+
+      const perf = new PerfMeter("toDataUrl");
+      const imgToRead = canvas.toDataURL();
+      perf.end();
+
+      // const perf = new PerfMeter("toDataUrl");
+      // const dbg = originalCanvas.getContext("2d");
+      perf.start("blobToRead");
+      const blobToRead: Blob | null = await new Promise((resolve) =>
+        canvas.toBlob(resolve)
+      );
+      perf.end();
+      console.log(blobToRead);
+
+      // setDebugImageUrl(debugImgUrl?.colorSpace);
+
+      // await ocr.loadLanguage("eng");
+      await ocr.initialize(OCR_TESSERACT_LANG);
+
+      perf.start("ocr.recognize");
+      const result = await ocr.recognize(imgToRead);
+      perf.end();
+
+      console.log(result.data.text);
+      console.log(result);
+
+      perf.start("ocr.recognize - blob");
+      const result2 = blobToRead && (await ocr.recognize(blobToRead));
+      perf.end();
+      console.log(result2?.data.text);
+      console.log(result2);
+    }
 
     // Sending the File Object into the Recognize function to
     // parse the data
@@ -123,6 +182,8 @@ export default function TensorDev(props: Props) {
         namesPricesResult.classes
       );
       console.log(pricetags);
+
+      readText(pricetags[2].name);
     }
   };
 
@@ -145,7 +206,7 @@ export default function TensorDev(props: Props) {
       // const collagePricetags = coll
 
       // const pricetags = realBoxes.map(
-      //   (rBox, boxIndex) => new PricetagMulti(rBox, collage.boxes[boxIndex])
+      //   (rBox, boxIndex) => new Product(rBox, collage.boxes[boxIndex])
       // );
 
       // console.log(pricetags);
@@ -196,12 +257,12 @@ export default function TensorDev(props: Props) {
         height={0}
       />
 
-      <p>namesAndPricesModelCanvas</p>
+      {/* <p>namesAndPricesModelCanvas</p>
       <canvas // namesAndPricesModelCanvas
         ref={namePriceCanvasRef}
         width={MODEL_NAME_PRICE_SIZE}
         height={MODEL_NAME_PRICE_SIZE}
-      />
+      /> */}
 
       <p>ocrCanvasRef</p>
       <canvas // ocrCanvasRef
@@ -216,6 +277,8 @@ export default function TensorDev(props: Props) {
         onLoad={onImageLoad}
         hidden={true}
       />
+      <p>debug image</p>
+      <img src={debugImageUrl} alt="Debug Image from URL" />
     </div>
   );
 }

@@ -21,3 +21,7 @@ export const CANVAS_STROKE_COLOR = "#00FFFF";
 export const CANVAS_LINE_WIDTH = 4;
 export const CANVAS_FONT = "14px sans-serif";
 export const CANVAS_FONT_COLOR = "#000000";
+
+// === OCR Tesseract.js ===
+// https://github.com/naptha/tesseract.js/blob/master/docs/tesseract_lang_list.md
+export const OCR_TESSERACT_LANG = "ces"; // czech
