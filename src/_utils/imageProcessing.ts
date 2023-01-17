@@ -1,6 +1,6 @@
 // import { GraphModel } from "@tensorflow/tfjs";
 
-import { browser, GraphModel, image, tidy, TypedArray } from "@tensorflow/tfjs";
+import { TypedArray } from "@tensorflow/tfjs";
 import {
   CANVAS_BG_COLOR,
   CANVAS_FONT,
@@ -10,22 +10,22 @@ import {
 } from "_constants";
 import { resizeDimsFit } from "./imageCalcs";
 import { isValidText } from "./other";
-import { reshapeTensorArrayOutput } from "./tensor";
 
-export const fitImageToCanvas = (
+export const drawImageToCanvas = (
   image: HTMLImageElement,
-  canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D
+  // resizeMethod: "fit" = "fit" - TODO: in case of future needs
 ) => {
-  const naturalWidth = image.naturalWidth;
-  const naturalHeight = image.naturalHeight;
+  const imageWidth = image.naturalWidth;
+  const imageHeight = image.naturalHeight;
+  const canvas = ctx.canvas;
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctx.fillStyle = CANVAS_BG_COLOR;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const { newWidth, newHeight } = resizeDimsFit(
-    [naturalWidth, naturalHeight],
+    [imageWidth, imageHeight],
     [canvas.width, canvas.height]
   );
 
@@ -33,8 +33,8 @@ export const fitImageToCanvas = (
     image,
     0,
     0,
-    naturalWidth,
-    naturalHeight,
+    imageWidth,
+    imageHeight,
     0,
     0,
     newWidth,
@@ -49,7 +49,6 @@ export const cropPriceTagToCanvas = (
   originalCords: TypedArray | number[],
   newCords: TypedArray | number[]
 ) => {
-  console.log("image-pricetag", ...originalCords, "-", ...newCords);
   const [x1, y1, x2, y2] = originalCords;
   const [n_x1, n_y1, n_x2, n_y2] = newCords;
 
@@ -65,7 +64,6 @@ export const cropPriceTagToCanvas = (
     n_y2 - n_y1
   );
 };
-
 
 /**
  * Draw bounding boxes over canvas. Not used function, kept just for debugging

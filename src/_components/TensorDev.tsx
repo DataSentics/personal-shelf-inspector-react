@@ -1,5 +1,6 @@
 import { GraphModel, TypedArray } from "@tensorflow/tfjs";
 import { useEffect, useRef, useState } from "react";
+import { createWorker } from "tesseract.js";
 import {
   CANVAS_BG_COLOR,
   MODEL_NAME_PRICE_SIZE,
@@ -8,10 +9,12 @@ import {
 import { Boxes } from "_types";
 import { getCollageBoxes, denormalizeBoxes } from "_utils/imageCalcs";
 import {
-  fitImageToCanvas,
+  drawImageToCanvas,
   cropPriceTagToCanvas,
   drawPredictions,
 } from "_utils/imageProcessing";
+import { BBox, PricetagCoords, PricetagMulti } from "_utils/objects";
+import { addDetailsToPricetags } from "_utils/pricetags";
 import { executeImageModel } from "_utils/tensor";
 
 type Props = {
@@ -21,42 +24,62 @@ type Props = {
   // counter?: number;
 };
 
-type Size = { width: number; height: number };
-
-// type TensorResponseArray = Float32Array | Int32Array | Uint8Array;
-
 export default function TensorDev(props: Props) {
   const { image, priceTagModel, namePriceModel } = props;
   const [imageUrl, setImageUrl] = useState<string>();
-  const priceTagCanvasRef = useRef<HTMLCanvasElement>(null);
+  const photoCanvasRef = useRef<HTMLCanvasElement>(null);
   const namePriceCanvasRef = useRef<HTMLCanvasElement>(null);
   const imageGeneratorCanvasRef = useRef<HTMLCanvasElement>(null);
+  const ocrCanvasRef = useRef<HTMLCanvasElement>(null);
   // const [imgGenSize, setImgGenSize] = useState<Size>({ width: 0, height: 0 });
   // const secondCanvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
-  const showSomeDebugBoxes = async (boxes: Boxes) => {
-    const canvas = namePriceCanvasRef.current;
-    const ctx = canvas?.getContext("2d", { alpha: false });
+  const ocrRef = useRef<Tesseract.Worker>();
 
-    const originalCanvas = imageGeneratorCanvasRef.current;
-
-    if (ctx && originalCanvas) {
-      const realBoxes = denormalizeBoxes(
-        boxes,
-        originalCanvas.width,
-        originalCanvas.height
-      );
-      const collage = getCollageBoxes(realBoxes, ctx.canvas.width);
-
-      ctx.fillStyle = CANVAS_BG_COLOR;
-      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-      realBoxes.map((box, boxIndex) => {
-        const colagBox = collage.boxes[boxIndex];
-        cropPriceTagToCanvas(originalCanvas, ctx, box, colagBox);
+  useEffect(() => {
+    const perform = async () => {
+      const worker = await createWorker({
+        logger: (m) => console.log(m),
       });
-    }
+      ocrRef.current = worker;
+    };
+    perform();
+  }, []);
+
+  // const showSomeDebugBoxes = async (boxes: Boxes) => {
+  //   const canvas = namePriceCanvasRef.current;
+  //   const ctx = canvas?.getContext("2d", { alpha: false });
+
+  //   const originalCanvas = imageGeneratorCanvasRef.current;
+
+  //   if (ctx && originalCanvas) {
+  //     const realBoxes = denormalizeBoxes(
+  //       boxes,
+  //       originalCanvas.width,
+  //       originalCanvas.height
+  //     );
+  //     const collage = getCollageBoxes(realBoxes, ctx.canvas.width);
+
+  //     ctx.fillStyle = CANVAS_BG_COLOR;
+  //     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+  //     realBoxes.map((box, boxIndex) => {
+  //       const colagBox = collage.boxes[boxIndex];
+  //       cropPriceTagToCanvas(originalCanvas, ctx, box, colagBox);
+  //     });
+  //   }
+  // };
+
+  const readText = async (bbox: number[]) => {
+    await ocrRef.current?.load();
+    // Loadingg language as 'English'
+    await ocrRef.current?.loadLanguage("eng");
+    await ocrRef.current?.initialize("eng");
+
+    // Sending the File Object into the Recognize function to
+    // parse the data
+    // const res = await ocrRef.current?.recognize(file.file);
   };
 
   const findNamesAndPrices = async (boxes: (TypedArray | number[])[]) => {
@@ -65,61 +88,77 @@ export default function TensorDev(props: Props) {
     const image = imageRef.current;
 
     if (canvas && namePriceModel && ctx && image) {
-      const realBoxes = denormalizeBoxes(
-        boxes,
-        image.naturalWidth,
-        image.naturalHeight
-      );
       // console.log("realBoxes", ...realBoxes);
 
-      const collage = getCollageBoxes(realBoxes, 400);
+      const collage = getCollageBoxes(boxes, false);
       console.log("height, width", collage.height, collage.width);
+      const collageSize = Math.max(collage.width, collage.height);
 
       // setImgGenSize({ width: collage.width, height: collage.height });
-      canvas.width = collage.width;
-      canvas.height = collage.height;
+      canvas.width = collageSize;
+      canvas.height = collageSize;
 
       ctx.fillStyle = CANVAS_BG_COLOR;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, collageSize, collageSize);
       console.log("canvas.width", canvas.width);
 
-      realBoxes.map((box, boxIndex) => {
+      boxes.map((box, boxIndex) => {
         const colagBox = collage.boxes[boxIndex];
         cropPriceTagToCanvas(image, ctx, box, colagBox);
       });
 
       // execute NamePrice model
       const namesPricesResult = await executeImageModel(namePriceModel, canvas);
-      showSomeDebugBoxes(namesPricesResult.boxes);
+      const namesPricesRealBoxes = denormalizeBoxes(
+        namesPricesResult.boxes,
+        canvas.width,
+        canvas.height
+      );
+      // showSomeDebugBoxes(namesPricesResult.boxes);
+
+      const pricetags = collage.boxes.map((rBox) => new PricetagCoords(rBox));
+      addDetailsToPricetags(
+        pricetags,
+        namesPricesRealBoxes,
+        namesPricesResult.classes
+      );
+      console.log(pricetags);
     }
   };
 
   const findPriceTags = async () => {
-    const canvas = priceTagCanvasRef.current;
-    const ctx = canvas?.getContext("2d");
+    const canvas = photoCanvasRef.current;
+    const ctx = canvas?.getContext("2d", { alpha: false });
     const image = imageRef.current;
 
     if (canvas && priceTagModel && ctx && image) {
-      fitImageToCanvas(image, canvas, ctx);
+      drawImageToCanvas(image, ctx);
 
-      const {
-        boxes,
-        scores,
-        validDetections: _asd,
-      } = await executeImageModel(priceTagModel, canvas);
+      const result = await executeImageModel(priceTagModel, canvas);
+      const realBoxes = denormalizeBoxes(
+        result.boxes,
+        image.naturalWidth,
+        image.naturalHeight
+      );
+      // const collage = getCollageBoxes(realBoxes, 640);
 
-      // const oneBoxes = boxes.slice(0, 1);
-      console.log(boxes);
+      // const collagePricetags = coll
+
+      // const pricetags = realBoxes.map(
+      //   (rBox, boxIndex) => new PricetagMulti(rBox, collage.boxes[boxIndex])
+      // );
+
+      // console.log(pricetags);
 
       // Uncomment FOR DEBUGGING PURPOSES
       drawPredictions(
         canvas,
         ctx,
-        boxes,
-        [...scores].map((s) => s.toFixed(2))
+        result.boxes,
+        [...result.scores].map((s) => s.toFixed(2))
       );
 
-      findNamesAndPrices(boxes);
+      findNamesAndPrices(realBoxes);
     }
   };
 
@@ -139,7 +178,7 @@ export default function TensorDev(props: Props) {
   return (
     <div>
       <canvas // priceTagModelCanvas
-        ref={priceTagCanvasRef}
+        ref={photoCanvasRef}
         width={MODEL_PRICETAG_SIZE}
         height={MODEL_PRICETAG_SIZE}
       />
@@ -162,6 +201,11 @@ export default function TensorDev(props: Props) {
         ref={namePriceCanvasRef}
         width={MODEL_NAME_PRICE_SIZE}
         height={MODEL_NAME_PRICE_SIZE}
+      />
+
+      <p>ocrCanvasRef</p>
+      <canvas // ocrCanvasRef
+        ref={ocrCanvasRef}
       />
 
       <img

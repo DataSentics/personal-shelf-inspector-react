@@ -33,15 +33,15 @@ export const getCollageBoxes = (
   maxSize?: number | false,
   tagsPerRow = TAGS_PER_ROW
 ) => {
-  let x_cursor = SPACE;
-  let y_cursor = 0;
+  let xPosition = SPACE;
+  let yPosition = 0;
   let maxHeightInRow = 0;
   let collageWidth = 0;
   let collageBoxes = boxes.map((box, boxIndex) => {
     if (boxIndex % tagsPerRow === 0) {
-      collageWidth = Math.max(x_cursor, collageWidth);
-      x_cursor = SPACE;
-      y_cursor += maxHeightInRow + SPACE;
+      collageWidth = Math.max(xPosition, collageWidth);
+      xPosition = SPACE;
+      yPosition += maxHeightInRow + SPACE;
       maxHeightInRow = 0;
     }
 
@@ -50,21 +50,21 @@ export const getCollageBoxes = (
     const boxHeight = y2 - y1;
 
     const collageBox = [
-      x_cursor,
-      y_cursor,
-      x_cursor + boxWidth,
-      y_cursor + boxHeight,
+      xPosition,
+      yPosition,
+      xPosition + boxWidth,
+      yPosition + boxHeight,
     ];
 
     maxHeightInRow = Math.max(boxHeight, maxHeightInRow);
-    x_cursor = x_cursor + boxWidth + SPACE;
+    xPosition += boxWidth + SPACE;
     // console.log(collageBox);
     return collageBox;
   });
 
   // console.log("collageBoxes", ...collageBoxes);
 
-  let collageHeight = y_cursor + maxHeightInRow + SPACE;
+  let collageHeight = yPosition + maxHeightInRow + SPACE;
   if (maxSize) {
     const { ratio } = resizeDimsFit(
       [collageWidth, collageHeight],
@@ -107,14 +107,31 @@ function denormalizeCoords(
  * DenormalizeBoxes. See 'denormalizeCoords' function
  */
 export const denormalizeBoxes = (
-  boxes: (TypedArray | number[])[],
+  boxes: TypedArray[],
   imageWidth: number,
   imageHeight: number
-): (TypedArray | number[])[] => {
+): number[][] => {
+  // const convertedBoxes = boxes.map((box) => {
+  //   // Keep TypedArray type for box - just for typings compatibility
+  //   const newBox = box.slice(0, 0);
+
+  //   const [x1, y1, x2, y2] = newBox;
+  //   const c1 = denormalizeCoords([x1, y1], imageWidth, imageHeight);
+  //   const c2 = denormalizeCoords([x2, y2], imageWidth, imageHeight);
+
+  //   newBox[0] = c1[0];
+  //   newBox[1] = c1[1];
+  //   newBox[2] = c2[0];
+  //   newBox[3] = c2[1];
+  //   return newBox;
+  // });
+
   const convertedBoxes = boxes.map(([x1, y1, x2, y2]) => {
     const c1 = denormalizeCoords([x1, y1], imageWidth, imageHeight);
     const c2 = denormalizeCoords([x2, y2], imageWidth, imageHeight);
+    // return [...c1, ...c2];
     return [...c1, ...c2];
   });
+
   return convertedBoxes;
 };

@@ -9,7 +9,7 @@ import {
 } from "@tensorflow/tfjs";
 import { Boxes } from "_types";
 
-type ReshapedOutput = {
+export type ReshapedOutput = {
   boxes: Boxes;
   scores: TypedArray | number[];
   classes: TypedArray | number[];
@@ -67,8 +67,6 @@ export async function reshapeTensorArrayOutput(
   const scores = scoresResult.slice(0, validDetections);
   const classes = classesResult.slice(0, validDetections);
 
-  console.log("classes", classesResult);
-
   const boxes = array1dTo2d(boxes1d, 4);
 
   return {
@@ -111,7 +109,7 @@ const getModelSize = (
 export const executeImageModel = async (
   model: GraphModel,
   canvas: HTMLCanvasElement
-) => {
+): Promise<ReshapedOutput> => {
   const [modelWidth, modelHeight] = getModelSize(model, canvas.width);
 
   const tensor = tensorFromCanvas(canvas, modelWidth, modelHeight);
@@ -122,7 +120,7 @@ export const executeImageModel = async (
 
   console.log(
     model["modelUrl"].split("/").slice(-2).join("/") +
-      ` executed in ${execEnd - execStart} ms`
+      ` executed in ${Math.round(execEnd - execStart)} ms`
   );
 
   if (!Array.isArray(tensorResult)) {
