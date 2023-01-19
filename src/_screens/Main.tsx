@@ -8,13 +8,13 @@ import {
   MODEL_PRICETAG_PATH,
 } from "_constants";
 
-const loadingState = (model: GraphModel | undefined) =>
+const loadingState = (model: GraphModel | null) =>
   model ? "Loaded!" : "Loading...";
 
 function Main() {
   const [photo, setPhoto] = useState<File>();
-  const [priceTagModel, setPriceTagModel] = useState<GraphModel>();
-  const [namePriceModel, setNamePriceModel] = useState<GraphModel>();
+  const [priceTagModel, setPriceTagModel] = useState<GraphModel | null>(null);
+  const [namePriceModel, setNamePriceModel] = useState<GraphModel | null>(null);
   // const [photoUrl, setPhotoUrl] = useState<string>();
 
   // console.log(photo);
@@ -55,8 +55,8 @@ function Main() {
       </div> */}
       <TensorDev
         image={photo}
-        priceTagModel={priceTagModel}
-        namePriceModel={namePriceModel}
+        pricetagGraphModel={priceTagModel}
+        namePriceGraphModel={namePriceModel}
       />
     </div>
   );

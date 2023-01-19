@@ -1,52 +1,21 @@
-import { Product, ProductOnShelf } from "./shelvesOperations";
-import {
-  addAngleToNextPricetag,
-  addPriceTagCenter,
-  addQuantiziedYCoords,
-  assignDetectedProductsToShelves,
-  getMedianAngle,
-  getShelfSortingDirection,
-  sortPricetagsHorizontally,
-  sortPricetagsTopToBottom,
-  sortShelvesLeftToRight,
-} from "./shelvesOperations";
+import { Product, Rack } from "./objects";
 
 /**
  * Tries to guess shelves number based on horizontal alignment
  * @param products List of products
  */
-export const guessShelves = (products: Product[]): ProductOnShelf[] => {
-  const productsWithQY = addQuantiziedYCoords(
-    products.map((product) => ({ product }))
-  );
-  console.log("productsWithQY");
-  console.log(productsWithQY);
+export const guessShelvesMock = (products: Product[]): Rack => {
+  const NUM_OF_SHELVES = 3;
+  const shelfSize = Math.ceil(products.length / NUM_OF_SHELVES);
+  console.log(shelfSize, products.length);
 
-  const productsMeta = addPriceTagCenter(productsWithQY);
-  const sorted1 = sortPricetagsTopToBottom(productsMeta);
+  const allShelves = [];
 
-  const horizontallySortedProducts = sortPricetagsHorizontally(
-    sorted1,
-    getShelfSortingDirection(sorted1)
-  );
+  for (let i = 0; i < NUM_OF_SHELVES; i += 1) {
+    const shelf = products.slice(i * shelfSize, i * shelfSize + shelfSize);
+    allShelves.push(shelf);
+  }
 
-  const productsWithAngles = addAngleToNextPricetag(horizontallySortedProducts);
-  //     //logSortedAngleValues(productsWithAngles);
-
-  const medianAngleBetweenPricetags = getMedianAngle(productsWithAngles);
-  const productsWithAssignedShelves = assignDetectedProductsToShelves(
-    productsWithAngles,
-    medianAngleBetweenPricetags
-  );
-
-  //     //so the products can always be read left to right, no matter under what angle image is captured
-  const leftToRightSortedProducts = sortShelvesLeftToRight(
-    productsWithAssignedShelves
-  );
-
-  //     return leftToRightSortedProducts;
-  return leftToRightSortedProducts.map((meta) => ({
-    pricetag: meta.product.pricetag,
-    shelfRow: meta.shelfRow,
-  }));
+  const rack = new Rack(allShelves);
+  return rack;
 };

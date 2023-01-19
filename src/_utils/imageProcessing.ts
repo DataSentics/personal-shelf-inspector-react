@@ -9,6 +9,7 @@ import {
   CANVAS_STROKE_COLOR,
 } from "_constants";
 import { resizeDimsFit } from "./imageCalcs";
+import { BBoxCoords } from "./objects";
 import { isValidText } from "./other";
 
 export const drawImageToCanvas = (
@@ -17,6 +18,8 @@ export const drawImageToCanvas = (
   // resizeMethod: "fit" = "fit" - TODO: in case of future needs
 ) => {
   const imageWidth = image.naturalWidth;
+  console.log("drawImageToCanvas", image.naturalWidth, image.width);
+
   const imageHeight = image.naturalHeight;
   const canvas = ctx.canvas;
 
@@ -42,7 +45,50 @@ export const drawImageToCanvas = (
   );
 };
 
-export const cropPriceTagToCanvas = (
+export const drawBoxesToCanvas = (
+  sourceImage: HTMLImageElement,
+  ctx: CanvasRenderingContext2D,
+  boxes: BBoxCoords[],
+  collageBoxes: BBoxCoords[]
+  // resizeMethod: "fit" = "fit" - TODO: in case of future needs
+) => {
+  // const imageWidth = image.naturalWidth;
+  // const imageHeight = image.naturalHeight;
+  // const canvas = ctx.canvas;
+
+  // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  // ctx.fillStyle = CANVAS_BG_COLOR;
+  // ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // const { newWidth, newHeight } = resizeDimsFit(
+  //   [imageWidth, imageHeight],
+  //   [canvas.width, canvas.height]
+  // );
+
+  // ctx.drawImage(
+  //   image,
+  //   0,
+  //   0,
+  //   imageWidth,
+  //   imageHeight,
+  //   0,
+  //   0,
+  //   newWidth,
+  //   newHeight
+  // );
+  const canvas = ctx.canvas;
+
+  ctx.fillStyle = CANVAS_BG_COLOR;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // console.log("canvas.width", canvas.width);
+
+  boxes.map((box, boxIndex) => {
+    const colagBox = collageBoxes[boxIndex];
+    cropBoxToCanvas(sourceImage, ctx, box, colagBox);
+  });
+};
+
+export const cropBoxToCanvas = (
   image: CanvasImageSource,
   // canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
@@ -128,3 +174,28 @@ export const drawPredictions = (
     ctx.fillText(label.toString(), canX1, canY1 + CANVAS_LINE_WIDTH / 2);
   });
 };
+
+/**
+ * Takes in a canvas and returns a URL to the image blob.       
+ *
+ * - result of canvas.toBlob is smaller and should be quicker than toDataURL
+ */
+async function imageUrlFromCanvas(canvas: HTMLCanvasElement) {
+  const imageBlob: Blob | null = await new Promise((resolve) =>
+    canvas.toBlob(resolve)
+  );
+  if (!imageBlob) throw new Error("Error creating blob from canvas");
+  const imageUrl = URL.createObjectURL(imageBlob);
+
+  return imageUrl;
+}
+
+export async function imageElemFromCanvas(canvas: HTMLCanvasElement) {
+  const imageUrl = await imageUrlFromCanvas(canvas);
+
+  const imgElement = document.createElement("img");
+  imgElement.src = imageUrl;
+  await imgElement.decode();
+
+  return imgElement;
+}

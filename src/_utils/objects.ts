@@ -68,13 +68,40 @@ enum PriceDetailClass {
 export class PricetagCoords {
   bbox: BBox;
 
-  name: BBox | undefined = undefined;
-  priceMain: BBox | undefined = undefined;
-  priceSub: BBox | undefined = undefined;
+  // name: BBox | undefined = undefined;
+  // priceMain: BBox | undefined = undefined;
+  // priceSub: BBox | undefined = undefined;
 
   constructor(bboxCoordinates: BBoxCoords) {
     this.bbox = new BBox(bboxCoordinates);
   }
+
+  // public addDetail(box: BBox, detailClass: number): boolean {
+  //   if (Object.values(PriceDetailClass).includes(detailClass)) {
+  //     if (detailClass === PriceDetailClass.NAME) this.name = box;
+  //     if (detailClass === PriceDetailClass.PRICE_MAIN) this.priceMain = box;
+  //     if (detailClass === PriceDetailClass.PRICE_SUB) this.priceSub = box;
+
+  //     return true;
+  //   }
+  //   console.warn(
+  //     "Adding PriceTag Detail Class of unknown value. " +
+  //       `value: '${detailClass}', allowed: ${Object.values(PriceDetailClass)}.`
+  //   );
+  //   return false;
+  // }
+}
+
+export class PricetagDetail extends PricetagCoords {
+  // bbox: BBox;
+
+  name: BBox | undefined = undefined;
+  priceMain: BBox | undefined = undefined;
+  priceSub: BBox | undefined = undefined;
+
+  // constructor(bboxCoordinates: BBoxCoords) {
+  //   this.bbox = new BBox(bboxCoordinates);
+  // }
 
   public addDetail(box: BBox, detailClass: number): boolean {
     if (Object.values(PriceDetailClass).includes(detailClass)) {
@@ -100,14 +127,46 @@ export class PricetagCoords {
  */
 export class Product {
   readonly original: PricetagCoords;
-  readonly collage: PricetagCoords;
+  public collage?: PricetagDetail;
 
   name: string | undefined = undefined;
   priceMain: string | number | undefined = undefined;
   priceSub: string | number | undefined = undefined;
 
-  constructor(original: BBoxCoords, collage: BBoxCoords) {
+  public setCollage(collageBox: BBoxCoords) {
+    this.collage = new PricetagDetail(collageBox);
+  }
+
+  // public get collage() {
+  //   return this.collage;
+  // }
+
+  constructor(original: BBoxCoords, collage?: BBoxCoords) {
     this.original = new PricetagCoords(original);
-    this.collage = new PricetagCoords(collage);
+    if (collage) this.collage = new PricetagDetail(collage);
+  }
+}
+
+// export class Shelf {
+//   // products: Array<Product>;
+
+//   constructor(public products: Array<Product> = []) {
+//     // this.products = products;
+//   }
+
+//   public addProduct(product: Product) {
+//     this.products.push(product);
+//   }
+// }
+
+type Shelf = Array<Product>;
+
+export class Rack {
+  constructor(public shelves: Array<Shelf> = []) {}
+
+  public get products(): Product[] {
+    return this.shelves.reduce((acc, shelf) => {
+      return [...acc, ...shelf];
+    }, [] as Product[]);
   }
 }

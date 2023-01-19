@@ -47,3 +47,7 @@ export class PerfMeter {
     return execTime;
   }
 }
+
+export function errorIfNotTrue(condition: boolean | any) {
+  if (condition) throw new Error("Throwing error becase condition not true");
+}

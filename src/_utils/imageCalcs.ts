@@ -28,7 +28,7 @@ export const resizeDimsFit = (
  * @param boxes
  * @returns
  */
-export const getCollageBoxes = (
+export const createCollage = (
   boxes: (number[] | TypedArray)[],
   maxSize?: number | false,
   tagsPerRow = TAGS_PER_ROW
@@ -78,7 +78,14 @@ export const getCollageBoxes = (
     // collageBoxes.map(box => box.map())
   }
 
-  return { boxes: collageBoxes, height: collageHeight, width: collageWidth };
+  const collageSize = Math.max(collageWidth, collageHeight);
+
+  return {
+    boxes: collageBoxes,
+    height: collageHeight,
+    width: collageWidth,
+    size: collageSize,
+  };
 };
 
 /**
