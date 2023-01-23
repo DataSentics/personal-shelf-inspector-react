@@ -25,28 +25,28 @@ jobs:
           node-version: 16
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
+        # run: npm ci # to perform clean install, probably not necessary
 
       - name: Build app
         run: npm run build
         env:
-          CI: false
+          CI: false # if true, npm will treat warnings as errors
 
-      - name: Build And Deploy
+      - name: Deploy (to Azure Static WebApp)
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ICY_GLACIER_028CE5A03 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "build" # App source code path
+          app_location: "build" # Built app source code path
+          skip_app_build: true # As it is done in previous steps
+          output_location: "" # Empty as it is done in previous steps
+          api_location: "" # No API
+          skip_api_build: true # No API
           
-          # api_location: "" # Api source code path - optional
-          skip_api_build: true
-          skip_app_build: true
-          output_location: "" # Built app content directory - optional
+          
           ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
