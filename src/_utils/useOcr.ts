@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { createWorker } from "tesseract.js";
 
-import { OCR_TESSERACT_LANG } from "_constants";
+import { OCR_ENGINE_MODE, OCR_TESSERACT_LANG } from "_constants";
 import { BBox } from "./objects";
 import { PerfMeter } from "./other";
 
@@ -17,7 +17,7 @@ export function useOcr() {
       await worker.loadLanguage(OCR_TESSERACT_LANG);
 
       const perf = new PerfMeter("Tesseract worker init");
-      await worker.initialize(OCR_TESSERACT_LANG);
+      await worker.initialize(OCR_TESSERACT_LANG, OCR_ENGINE_MODE);
       perf.end();
     };
     init();
@@ -54,38 +54,11 @@ export function useOcr() {
         bbox.height
       );
 
-      const perf = new PerfMeter("toDataUrl");
-      // const imgToRead = canvas.toDataURL();
+      // const perf = new PerfMeter("OCR.recognize()");
+      const result2 = await ocr.recognize(canvas);
       // perf.end();
-
-      // const perf = new PerfMeter("toDataUrl");
-      // const dbg = originalCanvas.getContext("2d");
-      // perf.start("blobToRead");
-      const blobToRead: Blob | null = await new Promise((resolve) =>
-        canvas.toBlob(resolve)
-      );
-      // perf.end();
-      // console.log(blobToRead);
-
-      // setDebugImageUrl(debugImgUrl?.colorSpace);
-
-      // // await ocr.loadLanguage("eng");
-      // perf.start("ocr.init");
-      // await ocr.initialize(OCR_TESSERACT_LANG);
-      // perf.end();
-
-      // perf.start("ocr.recognize");
-      // const result = await ocr.recognize(imgToRead);
-      // perf.end();
-
-      // console.log(result.data.text);
-      // console.log(result);
-
-      perf.start("ocr.recognize - blob");
-      const result2 = blobToRead && (await ocr.recognize(blobToRead));
-      perf.end();
       // console.log(result2?.data.text);
-      console.log(result2);
+      // console.log(result2);
 
       return result2;
     },

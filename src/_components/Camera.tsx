@@ -1,4 +1,10 @@
-import React, { cloneElement, useRef, ReactElement, Children } from "react";
+import React, {
+  cloneElement,
+  useRef,
+  ReactElement,
+  Children,
+  InputHTMLAttributes,
+} from "react";
 
 interface Props {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -6,10 +12,18 @@ interface Props {
   children: ReactElement | Array<ReactElement>;
   id?: string;
   hidden?: boolean;
+  inputCapture?: InputHTMLAttributes<HTMLInputElement>["capture"];
 }
 
 function Camera(props: Props) {
-  const { onChange, children, onPhotoTaken, id, hidden = true } = props;
+  const {
+    onChange,
+    children,
+    onPhotoTaken,
+    id,
+    hidden = true,
+    inputCapture = "environment",
+  } = props;
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onClick = () => {
@@ -32,7 +46,7 @@ function Camera(props: Props) {
         id={id}
         type="file"
         accept="image/*"
-        capture="environment"
+        capture={inputCapture}
         ref={inputRef}
         style={{ display: hidden ? "none" : "inline-block" }}
         onChange={handleCameraChange}

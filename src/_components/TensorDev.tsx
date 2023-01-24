@@ -1,5 +1,7 @@
-import { GraphModel, TypedArray } from "@tensorflow/tfjs";
 import { useEffect, useRef, useState } from "react";
+import { GraphModel, TypedArray } from "@tensorflow/tfjs";
+import { Button } from "@chakra-ui/react";
+
 import { useImageModel } from "_utils/useImageModel";
 import { createCollage, denormalizeBoxes } from "_utils/imageCalcs";
 import {
@@ -11,6 +13,7 @@ import { PricetagDetail, Product, Rack } from "_utils/objects";
 import { addDetailsToPricetags } from "_utils/pricetags";
 import { guessShelvesMock } from "_utils/shelves";
 import { useOcr } from "_utils/useOcr";
+import RackDisplay from "./RackDisplay";
 // import { guessShelves } from "_utils/oldShelves";
 
 type Props = {
@@ -160,11 +163,11 @@ export default function TensorDev(props: Props) {
         height={MODEL_PRICETAG_SIZE}
       /> */}
 
-      <div>
-        <button type="button" onClick={findPriceTags}>
+      {/* <div>
+        <Button type="button" onClick={findPriceTags}>
           Execute analysis again
-        </button>
-      </div>
+        </Button>
+      </div> */}
 
       <img
         ref={imageRef}
@@ -174,14 +177,12 @@ export default function TensorDev(props: Props) {
         hidden={true}
       />
 
-      <p>debug image</p>
-      <img
-        // ref={imageRef}
+      {/* <p>debug image</p> */}
+      {/* <img
         src={debugImageUrl}
         alt="For Debugging purposes"
-        // onLoad={onImageLoad}
-        // hidden={true}
-      />
+      /> */}
+      {rack && <RackDisplay rack={rack} />}
       {/* <img src={debugImageUrl} alt="Debug Image from URL" /> */}
     </div>
   );
