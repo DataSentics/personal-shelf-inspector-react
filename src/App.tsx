@@ -1,11 +1,11 @@
 import { ChakraProvider } from "@chakra-ui/react";
-
-import Main from "./_screens/Main";
+import { RouterProvider } from "react-router-dom";
+import router from "_router";
 
 function App() {
   return (
     <ChakraProvider>
-      <Main />
+      <RouterProvider router={router} />
     </ChakraProvider>
   );
 }
