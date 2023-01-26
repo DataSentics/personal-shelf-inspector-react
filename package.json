@@ -22,7 +22,8 @@
     "react-scripts": "5.0.1",
     "tesseract.js": "^4.0.2",
     "typescript": "^4.8.4",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "zustand": "^4.3.2"
   },
   "scripts": {
     "start": "BROWSER='google-chrome' && BROWSER_ARGS='--remote-debugging-port=9222' && react-scripts start",
