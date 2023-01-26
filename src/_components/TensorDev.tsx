@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { GraphModel, TypedArray } from "@tensorflow/tfjs";
-import { Button } from "@chakra-ui/react";
 
 import { useImageModel } from "_utils/useImageModel";
 import { createCollage, denormalizeBoxes } from "_utils/imageCalcs";
@@ -29,7 +28,6 @@ const NAME_PRICES_CANVAS_SIZE = 640;
 export default function TensorDev(props: Props) {
   const { image, pricetagGraphModel, namePriceGraphModel } = props;
   const [imageUrl, setImageUrl] = useState<string>();
-  const [debugImageUrl, setDebugImageUrl] = useState<string>();
   const imageRef = useRef<HTMLImageElement>(null);
   const [rack, setRack] = useState<Rack>();
 
@@ -157,18 +155,6 @@ export default function TensorDev(props: Props) {
 
   return (
     <div>
-      {/* <canvas // priceTagModelCanvas
-        ref={pricetagModel.canvasRef}
-        width={MODEL_PRICETAG_SIZE}
-        height={MODEL_PRICETAG_SIZE}
-      /> */}
-
-      {/* <div>
-        <Button type="button" onClick={findPriceTags}>
-          Execute analysis again
-        </Button>
-      </div> */}
-
       <img
         ref={imageRef}
         src={imageUrl}
@@ -177,13 +163,7 @@ export default function TensorDev(props: Props) {
         hidden={true}
       />
 
-      {/* <p>debug image</p> */}
-      {/* <img
-        src={debugImageUrl}
-        alt="For Debugging purposes"
-      /> */}
       {rack && <RackDisplay rack={rack} />}
-      {/* <img src={debugImageUrl} alt="Debug Image from URL" /> */}
     </div>
   );
 }

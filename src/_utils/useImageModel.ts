@@ -2,7 +2,6 @@ import { GraphModel, loadGraphModel } from "@tensorflow/tfjs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { drawPredictions } from "./imageProcessing";
 import { executeImageModel, ReshapedOutput } from "./tensor";
-import UUID from "./uuid";
 
 type UseModelOptions = {
   debug?: boolean; // flag that determines whether to display predictions on the canvas

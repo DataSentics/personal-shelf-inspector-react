@@ -1,24 +1,10 @@
-import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import {
-  Box,
-  FormControl,
-  FormLabel,
-  Link as ChakraLink,
-  Switch,
-} from "@chakra-ui/react";
+import { Box, Button } from "@chakra-ui/react";
 
 import { Paths } from "_router";
-import { useSettingStore } from "_store";
 import SettingSwitch from "./components/SettingSwitch";
 
 function Settings() {
-  // const showDebugPhotos = useSettingStore((state) => state.showDebugPhoto);
-  // const setBoolSetting = useSettingStore((state) => state.setBoolSetting);
-  // console.log(showDebugPhotos);
-
-  // const [isChecked, setIsChecked] = useState(false);
-
   return (
     <Box mt={2}>
       <SettingSwitch settingName="showDebugPhoto">
@@ -37,9 +23,9 @@ function Settings() {
         Show cropped pricetag details
       </SettingSwitch>
 
-      <ChakraLink to={Paths.HOME} as={RouterLink}>
+      <Button to={Paths.HOME} as={RouterLink} mt={5}>
         Go back home
-      </ChakraLink>
+      </Button>
     </Box>
   );
 }

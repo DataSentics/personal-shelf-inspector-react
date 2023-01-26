@@ -1,6 +1,5 @@
 import { TypedArray } from "@tensorflow/tfjs";
-import { Boxes } from "_types";
-import { BBox, BBoxCoords, PricetagCoords, PricetagDetail } from "./objects";
+import { BBox, BBoxCoords, PricetagDetail } from "./objects";
 
 export function addDetailsToPricetags(
   pricetags: PricetagDetail[],
