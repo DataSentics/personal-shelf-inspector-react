@@ -26,6 +26,6 @@ export const CANVAS_FONT_COLOR = "#000000";
 
 // === OCR Tesseract.js ===
 // https://github.com/naptha/tesseract.js/blob/master/docs/tesseract_lang_list.md
-export const OCR_TESSERACT_LANG = "ces"; // czech
+export const OCR_TESSERACT_LANG = "ces+eng"; // czech + english
 // https://github.com/tesseract-ocr/tesseract/blob/4.0.0/src/ccstruct/publictypes.h#L268
 export const OCR_ENGINE_MODE = OEM.LSTM_ONLY; // seems to give better results
