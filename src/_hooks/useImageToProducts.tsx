@@ -12,10 +12,10 @@ import {
 import { PricetagDetail, Product, Rack } from "_utils/objects";
 import { addDetailsToPricetags } from "_utils/pricetags";
 import { guessShelvesMock } from "_utils/shelves";
+import { ReshapedOutput } from "_utils/tensor";
 
 import useOcr from "./useOcr";
 import useImageModel from "./useImageModel";
-import { ReshapedOutput } from "_utils/tensor";
 
 type Options = {
   showDebugPhoto?: boolean;
@@ -42,15 +42,15 @@ function useImageToProducts(
   const imgPhotoRef = useRef<HTMLImageElement>(document.createElement("img"));
   const [rack, setRack] = useState<Rack>();
   const [ocrReadText] = useOcr();
-  // models
+  // model hooks
   const [pricetagResult, pricetagFuncs] = useImageModel(MODEL_PRICETAG_PATH, {
-    debug: showDebugPhoto,
+    isDebug: showDebugPhoto,
     canvasSize: PRICETAG_CANVAS_SIZE,
   });
   const [namePriceResult, namePriceFuncs] = useImageModel(
     MODEL_NAME_PRICE_PATH,
     {
-      debug: showDebugCollage,
+      isDebug: showDebugCollage,
     }
   );
 

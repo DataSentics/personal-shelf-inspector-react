@@ -30,7 +30,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint --fix --ext .js,.jsx,.ts,.tsx ."
+    "lint": "eslint --fix --ext .js,.jsx,.ts,.tsx .",
+    "gen:theme-typings": "chakra-cli tokens src/_styles/theme.ts",
+    "postinstall": "npm run gen:theme-typings"
   },
   "eslintConfig": {
     "extends": [
@@ -51,6 +53,7 @@
     ]
   },
   "devDependencies": {
+    "@chakra-ui/cli": "^2.3.0",
     "@typescript-eslint/eslint-plugin": "^5.48.0",
     "@typescript-eslint/parser": "^5.48.0",
     "eslint": "^8.31.0",

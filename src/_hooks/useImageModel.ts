@@ -4,7 +4,7 @@ import { drawPredictions } from "_utils/imageProcessing";
 import { executeImageModel, ReshapedOutput } from "_utils/tensor";
 
 type UseModelOptions = {
-  debug?: boolean; // flag that determines whether to display predictions on the canvas
+  isDebug?: boolean; // flag that determines whether to render canvas with predictions
   canvasSize?: number; // width and height of canvas, if not specified
 };
 
@@ -19,11 +19,14 @@ type UseImageModelReturn = [
   }
 ];
 
+/**
+ * Custom hook for handling image model execution.
+ */
 function useImageModel(
   modelSource: string | GraphModel | null,
   options: UseModelOptions = {}
 ): UseImageModelReturn {
-  const { debug: isDebug, canvasSize } = options;
+  const { isDebug, canvasSize } = options;
   const [model, setModel] = useState<GraphModel>();
   const [result, setResult] = useState<ReshapedOutput>();
   const canvasRef = useRef<HTMLCanvasElement>(document.createElement("canvas"));

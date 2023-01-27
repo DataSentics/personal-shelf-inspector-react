@@ -13,9 +13,3 @@ dev: ## Start local dev server
 install: ## Install deps from package.json
 	npm i
 
-# deploy: ## Deploy to google-cloud
-# 	@echo -n "Did you build SPA first? [y/N] " && read ans && [ $${ans:-N} = y ]
-# 	@echo Deploying to google-cloud
-	
-# 	gcloud app deploy
-
