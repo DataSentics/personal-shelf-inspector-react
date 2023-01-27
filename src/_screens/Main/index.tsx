@@ -5,6 +5,7 @@ import { useSettingStore } from "_store";
 import { useImageToProducts } from "_hooks";
 
 import TakingPhoto from "./components/TakingPhoto";
+import { RackDisplay } from "_components";
 
 function Main() {
   const [photoFile, setPhotoFile] = useState<File>();
@@ -21,14 +22,20 @@ function Main() {
     setPhotoFile(newPhoto);
   };
 
-  const [rack] = useImageToProducts(photoFile, {
+  const [rack, { imgCollageRef, isDetecting }] = useImageToProducts(photoFile, {
     showDebugCollage,
     showDebugPhoto,
   });
 
   return (
     <>
-      <TakingPhoto onPhotoTaken={onPhotoTaken} />
+      {!rack ? (
+        <TakingPhoto onPhotoTaken={onPhotoTaken} isDetecting={isDetecting} />
+      ) : (
+        <>
+          <RackDisplay rack={rack} imgCollageRef={imgCollageRef} />
+        </>
+      )}
     </>
   );
 }

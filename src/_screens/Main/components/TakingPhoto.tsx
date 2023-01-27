@@ -7,10 +7,11 @@ const HEADING_TITLE = "Personal \nShelf \nInspector";
 
 type Props = {
   onPhotoTaken?: (photo: File) => void;
+  isDetecting?: boolean;
 };
 
 function TakingPhoto(props: Props) {
-  const { onPhotoTaken } = props;
+  const { onPhotoTaken, isDetecting } = props;
 
   return (
     <>
@@ -25,10 +26,12 @@ function TakingPhoto(props: Props) {
         {HEADING_TITLE}
       </Heading>
 
-      <Box display="flex" justifyContent="center">
+      <Box display="flex" justifyContent="flex-start">
         <Camera onPhotoTaken={onPhotoTaken} inputCapture={false}>
           <Button
-            // colorScheme="brand"
+            isLoading={isDetecting}
+            loadingText="Detekuju"
+            spinnerPlacement="end"
             size="xl"
             rightIcon={<MdPhotoCamera />}
             iconSpacing="10"

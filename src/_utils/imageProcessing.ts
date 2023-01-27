@@ -176,7 +176,7 @@ export const drawPredictions = (
 };
 
 /**
- * Takes in a canvas and returns a URL to the image blob.       
+ * Takes in a canvas and returns a URL to the image blob.
  *
  * - result of canvas.toBlob is smaller and should be quicker than toDataURL
  */

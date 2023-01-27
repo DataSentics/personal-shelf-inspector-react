@@ -27,6 +27,8 @@ type ReturnType = [
   {
     pricetagResult: ReshapedOutput | undefined;
     namePriceResult: ReshapedOutput | undefined;
+    imgCollageRef: React.MutableRefObject<HTMLImageElement>;
+    isDetecting: boolean;
   }
 ];
 
@@ -42,6 +44,7 @@ function useImageToProducts(
   const imgPhotoRef = useRef<HTMLImageElement>(document.createElement("img"));
   const [rack, setRack] = useState<Rack>();
   const [ocrReadText] = useOcr();
+  const [isDetecting, setIsDetecting] = useState<boolean>(false);
   // model hooks
   const [pricetagResult, pricetagFuncs] = useImageModel(MODEL_PRICETAG_PATH, {
     isDebug: showDebugPhoto,
@@ -53,6 +56,9 @@ function useImageToProducts(
       isDebug: showDebugCollage,
     }
   );
+  // imgCollageRef is used only for debugging purposes. It is later replaced,
+  // but it's initialized now to avoid unnecessary checking for its' existence
+  const imgCollageRef = useRef<HTMLImageElement>(document.createElement("img"));
 
   const readAndUpdateProducts = useCallback(
     async (products: Product[], image: HTMLImageElement) => {
@@ -93,6 +99,9 @@ function useImageToProducts(
 
       // create img element with full size colage
       const collageImg = await imageElemFromCanvas(canvas);
+
+      // for debugging purposes
+      imgCollageRef.current = collageImg;
 
       // resize canvas before model processing and redraw callage
       namePriceFuncs.setCanvasSize(NAME_PRICES_CANVAS_SIZE);
@@ -144,8 +153,13 @@ function useImageToProducts(
     console.log(rack);
   }, [findNamesAndPrices, pricetagFuncs, readAndUpdateProducts]);
 
-  const onPhotoLoad = useCallback(() => {
-    findPriceTags();
+  const startDetection = useCallback(async () => {
+    try {
+      setIsDetecting(true);
+      await findPriceTags();
+    } finally {
+      setIsDetecting(false);
+    }
   }, [findPriceTags]);
 
   useEffect(() => {
@@ -161,11 +175,14 @@ function useImageToProducts(
       const imgPhoto = imgPhotoRef.current;
 
       imgPhoto.src = imageUrl;
-      imgPhoto.onload = onPhotoLoad;
+      imgPhoto.onload = startDetection;
     }
-  }, [imageUrl, onPhotoLoad]);
+  }, [imageUrl, startDetection]);
 
-  return [rack, { pricetagResult, namePriceResult }];
+  return [
+    rack,
+    { pricetagResult, namePriceResult, imgCollageRef, isDetecting },
+  ];
 }
 
 export default useImageToProducts;
