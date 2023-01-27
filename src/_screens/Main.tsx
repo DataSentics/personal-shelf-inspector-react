@@ -1,51 +1,36 @@
-import { useEffect, useState } from "react";
-import { GraphModel, loadGraphModel } from "@tensorflow/tfjs";
-import { Button, Heading, Text } from "@chakra-ui/react";
+import { useState } from "react";
+import { Button, Heading } from "@chakra-ui/react";
+import { shallow } from "zustand/shallow";
 
-import { Camera, TensorDev } from "_components";
-import {
-  MODEL_NAME_PRICE_PATH,
-  // MODEL_NAME_PRICE_SIZE,
-  MODEL_PRICETAG_PATH,
-} from "_constants";
-
-const loadingState = (model: GraphModel | null) =>
-  model ? "Loaded!" : "Loading...";
+import { Camera } from "_components";
+import { useSettingStore } from "_store";
+import { useImageToProducts } from "_hooks";
 
 function Main() {
-  const [photo, setPhoto] = useState<File>();
-  const [priceTagModel, setPriceTagModel] = useState<GraphModel | null>(null);
-  const [namePriceModel, setNamePriceModel] = useState<GraphModel | null>(null);
+  const [photoFile, setPhotoFile] = useState<File>();
 
-  useEffect(() => {
-    loadGraphModel(MODEL_PRICETAG_PATH).then((mdl) => setPriceTagModel(mdl));
-    loadGraphModel(MODEL_NAME_PRICE_PATH).then((mdl) => setNamePriceModel(mdl));
-  }, []);
+  const { showDebugPhoto, showDebugCollage } = useSettingStore((state) => ({
+    showDebugPhoto: state.showDebugPhoto,
+    showDebugCollage: state.showDebugCollage,
+    shallow,
+  }));
 
   const onPhotoTaken = (newPhoto: File) => {
-    // const objectUrl = URL.createObjectURL(newPhoto);
-
-    // setPhotoUrl(objectUrl);
-    setPhoto(newPhoto);
+    setPhotoFile(newPhoto);
   };
+
+  const [rack] = useImageToProducts(photoFile, {
+    showDebugCollage,
+    showDebugPhoto,
+  });
 
   return (
     <>
       <Heading>Personal Shelf Inspector</Heading>
-      <Text fontSize="xs">PriceTags model: {loadingState(priceTagModel)}</Text>
-      <Text fontSize="xs">
-        Names&Prices model: {loadingState(namePriceModel)}
-      </Text>
 
       <Camera onPhotoTaken={onPhotoTaken} inputCapture={false}>
         <Button>Take photos</Button>
       </Camera>
-
-      <TensorDev
-        image={photo}
-        pricetagGraphModel={priceTagModel}
-        namePriceGraphModel={namePriceModel}
-      />
     </>
   );
 }

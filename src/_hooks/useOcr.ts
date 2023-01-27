@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef } from "react";
 import { createWorker } from "tesseract.js";
 
 import { OCR_ENGINE_MODE, OCR_TESSERACT_LANG } from "_constants";
-import { BBox } from "./objects";
-import { PerfMeter } from "./other";
+import { BBox } from "../_utils/objects";
+import { PerfMeter } from "../_utils/other";
 
-export function useOcr() {
+function useOcr() {
   const ocrRef = useRef<Tesseract.Worker>();
 
   useEffect(() => {
@@ -65,5 +65,7 @@ export function useOcr() {
     []
   );
 
-  return { readText };
+  return [readText];
 }
+
+export default useOcr;

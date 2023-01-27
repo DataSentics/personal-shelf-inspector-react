@@ -1,22 +1,32 @@
 import { GraphModel, loadGraphModel } from "@tensorflow/tfjs";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { drawPredictions } from "./imageProcessing";
-import { executeImageModel, ReshapedOutput } from "./tensor";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { drawPredictions } from "_utils/imageProcessing";
+import { executeImageModel, ReshapedOutput } from "_utils/tensor";
 
 type UseModelOptions = {
   debug?: boolean; // flag that determines whether to display predictions on the canvas
   canvasSize?: number; // width and height of canvas, if not specified
 };
 
-export function useImageModel(
+type UseImageModelReturn = [
+  ReshapedOutput | undefined,
+  {
+    model: GraphModel | undefined;
+    execute: () => Promise<ReshapedOutput>;
+    canvasRef: React.MutableRefObject<HTMLCanvasElement>;
+    getCanvasContext: () => CanvasRenderingContext2D | null;
+    setCanvasSize: (size: number) => void;
+  }
+];
+
+function useImageModel(
   modelSource: string | GraphModel | null,
   options: UseModelOptions = {}
-) {
-  const { debug: isDebug } = options;
+): UseImageModelReturn {
+  const { debug: isDebug, canvasSize } = options;
   const [model, setModel] = useState<GraphModel>();
   const [result, setResult] = useState<ReshapedOutput>();
   const canvasRef = useRef<HTMLCanvasElement>(document.createElement("canvas"));
-  //   const [canvasDomId] = useState(UUID.get());
 
   // set model or load the model based on a string URL
   useEffect(() => {
@@ -29,21 +39,18 @@ export function useImageModel(
 
   // set the canvas size if the `canvasSize` option is passed
   useEffect(() => {
-    const { canvasSize } = options;
     if (canvasSize) {
       canvasRef.current.width = canvasSize;
       canvasRef.current.height = canvasSize;
     }
-  }, [options.canvasSize]);
+  }, [canvasSize]);
 
   useEffect(() => {
-    const htmlBody = document.getElementsByTagName("body")[0];
-    const canvasElem = canvasRef.current;
-
-    htmlBody?.appendChild(canvasElem);
-
     if (isDebug) {
+      const htmlBody = document.getElementsByTagName("body")[0];
+      const canvasElem = canvasRef.current;
       htmlBody.appendChild(canvasElem);
+
       return () => {
         htmlBody.removeChild(canvasElem);
       };
@@ -68,7 +75,7 @@ export function useImageModel(
       setResult(result);
 
       // Draws the predictions on the canvas if the `debug` option is passed
-      if (options.debug)
+      if (isDebug)
         drawPredictions(
           canvas,
           ctx,
@@ -80,7 +87,7 @@ export function useImageModel(
       console.warn(`Problem with model '${model}' or canvas '${canvas}'`);
       throw new Error("Model or canvas are not loaded");
     }
-  }, [model, canvasRef]);
+  }, [model, isDebug]);
 
   // getCanvasContext function that can be used to get the 2D rendering context of the canvas
   const getCanvasContext = useCallback(
@@ -89,5 +96,17 @@ export function useImageModel(
   );
 
   // exports the `canvasRef` and `result` as object properties which allows you to access the canvas element and the result of the execution of the model respectively.
-  return { result, model, execute, canvasRef, getCanvasContext, setCanvasSize };
+  const functionsObject = useMemo(() => {
+    return {
+      model,
+      execute,
+      canvasRef,
+      getCanvasContext,
+      setCanvasSize,
+    };
+  }, [model, execute, canvasRef, getCanvasContext, setCanvasSize]);
+
+  return [result, functionsObject];
 }
+
+export default useImageModel;

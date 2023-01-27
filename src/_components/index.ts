@@ -1,4 +1,4 @@
 import Camera from "./Camera";
-import TensorDev from "./TensorDev";
+import RackDisplay from "./RackDisplay";
 
-export { Camera, TensorDev };
+export { Camera, RackDisplay };
