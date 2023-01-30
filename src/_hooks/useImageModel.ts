@@ -50,7 +50,7 @@ function useImageModel(
 
   useEffect(() => {
     if (isDebug) {
-      const htmlBody = document.getElementsByTagName("body")[0];
+      const htmlBody = document.getElementsByTagName("main")[0] as HTMLElement;
       const canvasElem = canvasRef.current;
       htmlBody.appendChild(canvasElem);
 
