@@ -41,6 +41,7 @@ type ReturnType = [
     namePriceResult: ReshapedOutput | undefined;
     imgCollageRef: React.MutableRefObject<HTMLImageElement>;
     isDetecting: boolean;
+    reset: () => void;
   }
 ];
 
@@ -79,6 +80,7 @@ function useImageToProducts(
   const { showDebugCollage, showDebugPhoto, doPricetagImgs } = options;
   const [imageUrl, setImageUrl] = useState<string>();
   const imgPhotoRef = useRef<HTMLImageElement>(document.createElement("img"));
+  const imgCollageRef = useRef<HTMLImageElement>(document.createElement("img"));
   const [rack, setRack] = useState<Rack>();
   const [ocrReadText] = useOcr();
   const [isDetecting, setIsDetecting] = useState<boolean>(false);
@@ -93,9 +95,6 @@ function useImageToProducts(
       isDebug: showDebugCollage,
     }
   );
-  // imgCollageRef is used only for debugging purposes. It is later replaced,
-  // but it's initialized now to avoid unnecessary checking for its' existence
-  const imgCollageRef = useRef<HTMLImageElement>(document.createElement("img"));
 
   const ocrAndUpdateProds = useCallback(
     async (products: Product[], image: HTMLImageElement) => {
@@ -237,9 +236,16 @@ function useImageToProducts(
     }
   }, [imageUrl, startDetection]);
 
+  const reset = useCallback(() => {
+    setImageUrl(undefined);
+    setRack(undefined);
+    pricetagFuncs.reset();
+    namePriceFuncs.reset();
+  }, [pricetagFuncs, namePriceFuncs]);
+
   return [
     rack,
-    { pricetagResult, namePriceResult, imgCollageRef, isDetecting },
+    { pricetagResult, namePriceResult, imgCollageRef, isDetecting, reset },
   ];
 }
 

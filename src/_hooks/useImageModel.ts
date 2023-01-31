@@ -16,6 +16,7 @@ type UseImageModelReturn = [
     canvasRef: React.MutableRefObject<HTMLCanvasElement>;
     getCanvasContext: () => CanvasRenderingContext2D | null;
     setCanvasSize: (size: number) => void;
+    reset: () => void;
   }
 ];
 
@@ -89,14 +90,23 @@ function useImageModel(
 
   // set the canvas size if the `canvasSize` option is passed
   useEffect(() => {
-    if (canvasSize) setCanvasSize(canvasSize);
-    else if (model && getModelSize(model)) {
-      const size = getModelSize(model);
-      if (size) setCanvasSize(size[0]);
-    } else {
-      console.warn("Canvas size not set");
+    if (!model) return;
+    if (canvasSize) {
+      setCanvasSize(canvasSize);
+      return;
     }
+    const modelSize = getModelSize(model);
+    if (modelSize) {
+      setCanvasSize(modelSize[0]);
+      return;
+    }
+
+    console.warn("Canvas size not set");
   }, [canvasSize, model, setCanvasSize]);
+
+  const reset = useCallback(() => {
+    setResult(undefined);
+  }, []);
 
   // exports the `canvasRef` and `result` as object properties which allows you to access the canvas element and the result of the execution of the model respectively.
   const functionsObject = useMemo(() => {
@@ -106,8 +116,9 @@ function useImageModel(
       canvasRef,
       getCanvasContext,
       setCanvasSize,
+      reset,
     };
-  }, [model, execute, canvasRef, getCanvasContext, setCanvasSize]);
+  }, [model, execute, canvasRef, getCanvasContext, setCanvasSize, reset]);
 
   return [result, functionsObject];
 }
