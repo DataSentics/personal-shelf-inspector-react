@@ -73,7 +73,8 @@ registerRoute(
 // The default handler will only apply if your own
 // fetch handler didn't respond.
 registerRoute(
-  ({ url }) => url.pathname.endsWith(".json") || url.pathname.endsWith(".js"),
+  ({ url }) =>
+    url.pathname.includes("tesseract/") || url.pathname.includes("web_models/"),
   new StaleWhileRevalidate()
 );
 
