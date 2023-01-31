@@ -51,7 +51,6 @@ export async function reshapeTensorArrayOutput(
   tensorRanks: Tensor<Rank>[]
   // _minScoreIgnored: number // TODO: this should be used
 ): Promise<ReshapedOutput> {
-  console.debug("Reshaping ARRAY Tensor output");
   const [boxesTensor, scoresTensor, classesTensor, validDetectionsTensor] =
     tensorRanks;
 

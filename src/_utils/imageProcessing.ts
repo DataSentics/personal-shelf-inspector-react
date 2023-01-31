@@ -18,7 +18,7 @@ export const drawImageToCanvas = (
   // resizeMethod: "fit" = "fit" - TODO: in case of future needs
 ) => {
   const imageWidth = image.naturalWidth;
-  console.log("drawImageToCanvas", image.naturalWidth, image.width);
+  // console.log("drawImageToCanvas", image.naturalWidth, image.width);
 
   const imageHeight = image.naturalHeight;
   const canvas = ctx.canvas;

@@ -7,7 +7,7 @@ import { Product, Rack } from "./objects";
 export const guessShelvesMock = (products: Product[]): Rack => {
   const NUM_OF_SHELVES = 3;
   const shelfSize = Math.ceil(products.length / NUM_OF_SHELVES);
-  console.log(shelfSize, products.length);
+  // console.log(shelfSize, products.length);
 
   const allShelves = [];
 

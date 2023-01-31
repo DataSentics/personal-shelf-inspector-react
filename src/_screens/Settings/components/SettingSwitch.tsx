@@ -17,7 +17,7 @@ function SettingSwitch(props: Props) {
   const setBoolSetting = useSettingStore((state) => state.setBoolSetting);
 
   return (
-    <FormControl display="flex" alignItems="center">
+    <FormControl display="flex" alignItems="center" mb={2}>
       <Switch
         id={switchId}
         isChecked={settingValue}

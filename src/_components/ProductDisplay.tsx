@@ -8,10 +8,51 @@ type Props = {
   pricetagDetailsImgs?: boolean;
 };
 
+type ProductImageDisplayProps = Pick<
+  Props,
+  "product" | "pricetagImgs" | "pricetagDetailsImgs"
+>;
+
+function ProductImageDisplay(props: ProductImageDisplayProps) {
+  const { product, pricetagImgs, pricetagDetailsImgs } = props;
+
+  if (!pricetagImgs && !pricetagDetailsImgs) return null;
+
+  return (
+    <Stack direction="row" wrap="wrap">
+      {pricetagImgs && (
+        <img alt="Cenovka produktu" src={product.collage.bbox.imageUrl} />
+      )}
+      {pricetagDetailsImgs && (
+        <>
+          <Box>
+            <Text>Jméno</Text>
+            <img alt="Nazov produktu" src={product.collage.name?.imageUrl} />
+          </Box>
+
+          <Box>
+            <Text>Cena</Text>
+            <img
+              alt="Cena v celých korunách"
+              src={product.collage.priceMain?.imageUrl}
+            />
+          </Box>
+
+          <Box>
+            <Text>Halíře</Text>
+            <img
+              alt="Cena v halířech"
+              src={product.collage.priceSub?.imageUrl}
+            />
+          </Box>
+        </>
+      )}
+    </Stack>
+  );
+}
+
 function ProductDisplay(props: Props) {
   const { product, isEven, pricetagImgs, pricetagDetailsImgs } = props;
-
-  // console.log(product.collage.bbox);
 
   return (
     <Box
@@ -27,27 +68,11 @@ function ProductDisplay(props: Props) {
         </Box>
       </Box>
 
-      <Stack direction="row" wrap="wrap">
-        {pricetagImgs && <img src={product.collage.bbox.imageUrl} />}
-        {pricetagDetailsImgs && (
-          <>
-            <Box>
-              <Text>Jméno</Text>
-              <img src={product.collage.name?.imageUrl} />
-            </Box>
-
-            <Box>
-              <Text>Cena</Text>
-              <img src={product.collage.priceMain?.imageUrl} />
-            </Box>
-
-            <Box>
-              <Text>Halíře</Text>
-              <img src={product.collage.priceSub?.imageUrl} />
-            </Box>
-          </>
-        )}
-      </Stack>
+      <ProductImageDisplay
+        product={product}
+        pricetagImgs={pricetagImgs}
+        pricetagDetailsImgs={pricetagDetailsImgs}
+      />
     </Box>
   );
 }
