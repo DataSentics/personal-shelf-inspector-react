@@ -70,6 +70,13 @@ registerRoute(
   })
 );
 
+// The default handler will only apply if your own
+// fetch handler didn't respond.
+registerRoute(
+  ({ url }) => url.pathname.endsWith(".json") || url.pathname.endsWith(".js"),
+  new StaleWhileRevalidate()
+);
+
 // This allows the web app to trigger skipWaiting via
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
 self.addEventListener("message", (event) => {
