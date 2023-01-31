@@ -18,7 +18,8 @@ install: ## Install deps from package.json
 
 copy-tesseract: ## Copy latest teseract files to public/scripts folder
 	@cp 'node_modules/tesseract.js/dist/worker.min.js' $(TESSERACT_PATH)
+	@cp 'node_modules/tesseract.js/dist/worker.min.js.map' $(TESSERACT_PATH)
 	@cp 'node_modules/tesseract.js-core/tesseract-core.wasm.js' $(TESSERACT_PATH)
-	@curl https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata -LJ --output "$(TESSERACT_LANG_PATH)/eng.traineddata"
-	@curl https://github.com/tesseract-ocr/tessdata/raw/main/ces.traineddata -LJ --output "$(TESSERACT_LANG_PATH)/ces.traineddata"
 	
+	@curl https://github.com/naptha/tessdata/raw/gh-pages/4.0.0/ces.traineddata.gz -LJ --output "$(TESSERACT_LANG_PATH)/ces.traineddata.gz"
+	@curl https://github.com/naptha/tessdata/raw/gh-pages/4.0.0/eng.traineddata.gz -LJ --output "$(TESSERACT_LANG_PATH)/eng.traineddata.gz"
