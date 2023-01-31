@@ -89,14 +89,14 @@ export const tensorFromCanvas = (
       .expandDims(0)
   );
 
-const getModelSize = (
-  model: GraphModel,
-  backupDefaultSize: number
-): [number, number] => {
+export const getModelSize = (
+  model: GraphModel
+  // backupDefaultSize: number
+): [number, number] | undefined => {
   // backupDefaultSize is used if model doesn't contain this info. This shouldn't
   // happen, but typescript would be unhappy otherwise
-  const BDS = backupDefaultSize;
-  return (model.inputs[0].shape?.slice(1, 3) as [number, number]) || [BDS, BDS];
+  // const BDS = backupDefaultSize;
+  return (model.inputs[0].shape?.slice(1, 3) as [number, number]) || undefined;
 };
 
 /**
@@ -110,7 +110,9 @@ export const executeImageModel = async (
   model: GraphModel,
   canvas: HTMLCanvasElement
 ): Promise<ReshapedOutput> => {
-  const [modelWidth, modelHeight] = getModelSize(model, canvas.width);
+  // const canvW
+  const backupSize = [canvas.width, canvas.width];
+  const [modelWidth, modelHeight] = getModelSize(model) || backupSize;
 
   const tensor = tensorFromCanvas(canvas, modelWidth, modelHeight);
 

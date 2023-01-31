@@ -14,11 +14,12 @@ import ProductDisplay from "./ProductDisplay";
 
 type Props = {
   rack: Rack;
-  imgCollageRef: React.MutableRefObject<HTMLImageElement>;
+  showPricetagImgs: boolean;
+  showPricetagDetailsImgs: boolean;
 };
 
 export default function RackDisplay(props: Props) {
-  const { rack, imgCollageRef } = props;
+  const { rack, showPricetagImgs, showPricetagDetailsImgs } = props;
   return (
     <>
       <Heading mb={6}>Regály</Heading>
@@ -38,6 +39,8 @@ export default function RackDisplay(props: Props) {
                   <ProductDisplay
                     key={`PrdcOnShelf_${productIndex}`}
                     product={product}
+                    pricetagImgs={showPricetagImgs}
+                    pricetagDetailsImgs={showPricetagDetailsImgs}
                     isEven={productIndex % 2 === 0}
                   />
                 ))}

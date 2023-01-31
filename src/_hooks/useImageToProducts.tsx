@@ -1,25 +1,35 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TypedArray } from "@tensorflow/tfjs";
 
-import { MODEL_NAME_PRICE_PATH, MODEL_PRICETAG_PATH } from "_constants";
+import {
+  MODEL_NAME_PRICE_PATH,
+  MODEL_NAME_PRICE_SIZE,
+  MODEL_PRICETAG_PATH,
+  MODEL_PRICETAG_SIZE,
+} from "_constants";
 
 import { createCollage, denormalizeBoxes } from "_utils/imageCalcs";
 import {
   drawImageToCanvas,
   drawBoxesToCanvas,
   imageElemFromCanvas,
+  getCanvasFromBox,
+  imageUrlFromCanvas,
 } from "_utils/imageProcessing";
-import { PricetagDetail, Product, Rack } from "_utils/objects";
+import { BBox, PricetagDetail, Product, Rack } from "_utils/objects";
 import { addDetailsToPricetags } from "_utils/pricetags";
 import { guessShelvesMock } from "_utils/shelves";
 import { ReshapedOutput } from "_utils/tensor";
 
 import useOcr from "./useOcr";
 import useImageModel from "./useImageModel";
+import { PerfMeter } from "_utils/other";
 
 type Options = {
   showDebugPhoto?: boolean;
   showDebugCollage?: boolean;
+  doPricetagImgs?: boolean;
+  // doPricetagDetailsImgs?: boolean;
 };
 
 type ReturnType = [
@@ -32,14 +42,44 @@ type ReturnType = [
   }
 ];
 
-const PRICETAG_CANVAS_SIZE = 640;
-const NAME_PRICES_CANVAS_SIZE = 640;
+async function getImageFromBBox(
+  originalImage: HTMLImageElement,
+  bbox: BBox
+): Promise<string> {
+  const canvasCtx = getCanvasFromBox(originalImage, bbox);
+  const newImage = await imageUrlFromCanvas(canvasCtx.canvas);
+  // bbox.imageUrl = newImage;
+  return newImage;
+}
+
+async function updateProductWithImages(
+  product: Product,
+  originalImage: HTMLImageElement
+) {
+  const { bbox: pricetag, name, priceSub, priceMain } = product.collage;
+  const detailBoxes = [name, pricetag, priceSub, priceMain];
+
+  for (const box of detailBoxes) {
+    if (box) {
+      const imageUrl = await getImageFromBBox(originalImage, box);
+      box.imageUrl = imageUrl;
+    }
+  }
+}
+
+// const PRICETAG_CANVAS_SIZE = 640;
+// const NAME_PRICES_CANVAS_SIZE = 640;
 
 function useImageToProducts(
   photoFile: File | undefined,
   options: Options = {}
 ): ReturnType {
-  const { showDebugCollage, showDebugPhoto } = options;
+  const {
+    showDebugCollage,
+    showDebugPhoto,
+    doPricetagImgs,
+    // doPricetagDetailsImgs,
+  } = options;
   const [imageUrl, setImageUrl] = useState<string>();
   const imgPhotoRef = useRef<HTMLImageElement>(document.createElement("img"));
   const [rack, setRack] = useState<Rack>();
@@ -48,7 +88,7 @@ function useImageToProducts(
   // model hooks
   const [pricetagResult, pricetagFuncs] = useImageModel(MODEL_PRICETAG_PATH, {
     isDebug: showDebugPhoto,
-    canvasSize: PRICETAG_CANVAS_SIZE,
+    canvasSize: MODEL_PRICETAG_SIZE,
   });
   const [namePriceResult, namePriceFuncs] = useImageModel(
     MODEL_NAME_PRICE_PATH,
@@ -60,27 +100,39 @@ function useImageToProducts(
   // but it's initialized now to avoid unnecessary checking for its' existence
   const imgCollageRef = useRef<HTMLImageElement>(document.createElement("img"));
 
-  const readAndUpdateProducts = useCallback(
+  const ocrAndUpdateProds = useCallback(
     async (products: Product[], image: HTMLImageElement) => {
       // products.forEach(async (product, index) => {
       for (const product of products) {
-        const nameResult = await ocrReadText(image, product.collage?.name);
+        const nameResult = await ocrReadText(image, product.collage.name);
         const priceMainResult = await ocrReadText(
           image,
-          product.collage?.priceMain
+          product.collage.priceMain
         );
         const priceSubResult = await ocrReadText(
           image,
-          product.collage?.priceSub
+          product.collage.priceSub
         );
 
-        product.name = nameResult?.data.text;
-        product.priceMain = priceMainResult?.data.text;
-        product.priceSub = priceSubResult?.data.text;
+        product.name = nameResult?.data.text.trim();
+        product.priceMain = priceMainResult?.data.text.trim();
+        product.priceSub = priceSubResult?.data.text.trim();
       }
     },
     [ocrReadText]
   );
+
+  // useEffect(() => {
+  //   async function perform(rack: Rack) {
+  //     // if (rack) {
+  //     const products = rack.products;
+  //     for (const product of products) {
+  //       await updateProductWithImages(product, imgPhotoRef.current);
+  //       // }
+  //     }
+  //   }
+  //   if (doPricetagImgs && rack) perform(rack);
+  // }, [rack, doPricetagImgs]);
 
   const findNamesAndPrices = useCallback(
     async (
@@ -92,6 +144,7 @@ function useImageToProducts(
 
       if (!ctx || !image) throw new Error("Image or context not ready");
       const canvas = ctx.canvas;
+      const originalSize = canvas.width;
       namePriceFuncs.setCanvasSize(collage.size);
 
       // draw original boxes to canvas
@@ -103,8 +156,8 @@ function useImageToProducts(
       // for debugging purposes
       imgCollageRef.current = collageImg;
 
-      // resize canvas before model processing and redraw callage
-      namePriceFuncs.setCanvasSize(NAME_PRICES_CANVAS_SIZE);
+      // resize canvas before model processing and redraw callage image
+      namePriceFuncs.setCanvasSize(MODEL_NAME_PRICE_SIZE || originalSize);
       drawImageToCanvas(collageImg, ctx);
 
       const result = await namePriceFuncs.execute();
@@ -135,23 +188,42 @@ function useImageToProducts(
       image.naturalHeight
     );
 
-    const unsortedProducts = realBoxes.map((rBox) => new Product(rBox));
+    // const unsortedProducts = realBoxes.map((rBox) => new Product(rBox));
+    const [pricetagDetails, collageImg] = await findNamesAndPrices(realBoxes);
+
+    const unsortedProducts = realBoxes.map(
+      (rBox, rBoxIndex) => new Product(rBox, pricetagDetails[rBoxIndex])
+    );
+
     const rack = guessShelvesMock(unsortedProducts);
     console.log(rack);
     const sortedProducts = rack.products;
 
-    const [collageProducts, collageImg] = await findNamesAndPrices(
-      sortedProducts.map((prod) => prod.original.bbox.coords)
-    );
+    // async function perform(rack: Rack) {
+    //   // if (rack) {
+    //   const products = rack.products;
+    //   for (const product of products) {
+    //     await updateProductWithImages(product, imgPhotoRef.current);
+    //     // }
+    //   }
+    // }
+    if (doPricetagImgs && rack) {
+      for (const product of sortedProducts) {
+        await updateProductWithImages(product, collageImg);
+        // }
+      }
+    }
 
-    sortedProducts.forEach(
-      (product, prodIndex) => (product.collage = collageProducts[prodIndex])
-    );
+    // sortedProducts.forEach(
+    //   (product, prodIndex) => (product.collage = pricetagDetails[prodIndex])
+    // );
+    const perf = new PerfMeter("OCR main");
+    await ocrAndUpdateProds(sortedProducts, collageImg);
+    perf.end();
 
-    await readAndUpdateProducts(sortedProducts, collageImg);
     setRack(rack);
     console.log(rack);
-  }, [findNamesAndPrices, pricetagFuncs, readAndUpdateProducts]);
+  }, [findNamesAndPrices, pricetagFuncs, ocrAndUpdateProds, doPricetagImgs]);
 
   const startDetection = useCallback(async () => {
     try {

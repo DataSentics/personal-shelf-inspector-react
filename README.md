@@ -1,6 +1,20 @@
-# Getting Started with Create React App
+# Personal Shelf Inspector
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+WebApp to help people with impaired vision to recognize and read products' pricetags in shops
+
+
+## Online version
+
+
+## About
+
+It uses ML models to recognize pricetags and and its' parts and then OCR to read them.
+This is MVP. Feel free to contact us if you'd like to contribute.
+
+## Tech
+
+- React (CRA)
+
 
 ## Available Scripts
 

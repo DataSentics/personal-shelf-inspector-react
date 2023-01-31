@@ -9,7 +9,7 @@ import {
   CANVAS_STROKE_COLOR,
 } from "_constants";
 import { resizeDimsFit } from "./imageCalcs";
-import { BBoxCoords } from "./objects";
+import { BBox, BBoxCoords } from "./objects";
 import { isValidText } from "./other";
 
 export const drawImageToCanvas = (
@@ -112,6 +112,37 @@ export const cropBoxToCanvas = (
 };
 
 /**
+ *
+ * @param image
+ * @param bbox
+ * @returns Creates canvas context based on bbox
+ */
+export function getCanvasFromBox(
+  image: HTMLImageElement,
+  bbox: BBox
+): CanvasRenderingContext2D {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d", { alpha: false });
+
+  canvas.width = bbox.width;
+  canvas.height = bbox.height;
+
+  if (!ctx) throw new Error("Canvas not ready");
+  ctx.drawImage(
+    image,
+    bbox.x1,
+    bbox.y1,
+    bbox.width,
+    bbox.height,
+    0,
+    0,
+    bbox.width,
+    bbox.height
+  );
+  return ctx;
+}
+
+/**
  * Draw bounding boxes over canvas. Not used function, kept just for debugging
  * @param tensorRanks
  * @param canvas
@@ -180,7 +211,7 @@ export const drawPredictions = (
  *
  * - result of canvas.toBlob is smaller and should be quicker than toDataURL
  */
-async function imageUrlFromCanvas(canvas: HTMLCanvasElement) {
+export async function imageUrlFromCanvas(canvas: HTMLCanvasElement) {
   const imageBlob: Blob | null = await new Promise((resolve) =>
     canvas.toBlob(resolve)
   );

@@ -12,6 +12,8 @@ export class BBox {
   readonly y1: number;
   readonly x2: number;
   readonly y2: number;
+  imageUrl?: string;
+
   constructor(coordinates: BBoxCoords) {
     this.x1 = coordinates[0];
     this.y1 = coordinates[1];
@@ -67,29 +69,11 @@ enum PriceDetailClass {
  */
 export class PricetagCoords {
   bbox: BBox;
-
-  // name: BBox | undefined = undefined;
-  // priceMain: BBox | undefined = undefined;
-  // priceSub: BBox | undefined = undefined;
+  // private _imageUrl?: string; // path to file
 
   constructor(bboxCoordinates: BBoxCoords) {
     this.bbox = new BBox(bboxCoordinates);
   }
-
-  // public addDetail(box: BBox, detailClass: number): boolean {
-  //   if (Object.values(PriceDetailClass).includes(detailClass)) {
-  //     if (detailClass === PriceDetailClass.NAME) this.name = box;
-  //     if (detailClass === PriceDetailClass.PRICE_MAIN) this.priceMain = box;
-  //     if (detailClass === PriceDetailClass.PRICE_SUB) this.priceSub = box;
-
-  //     return true;
-  //   }
-  //   console.warn(
-  //     "Adding PriceTag Detail Class of unknown value. " +
-  //       `value: '${detailClass}', allowed: ${Object.values(PriceDetailClass)}.`
-  //   );
-  //   return false;
-  // }
 }
 
 export class PricetagDetail extends PricetagCoords {
@@ -119,31 +103,42 @@ export class PricetagDetail extends PricetagCoords {
   }
 }
 
+export class ProductBase {
+  readonly original: PricetagCoords;
+  // public collage: PricetagDetail;
+
+  name: string | undefined = undefined;
+  priceMain: string | number | undefined = undefined;
+  priceSub: string | number | undefined = undefined;
+
+  // public setCollage(collageBox: BBoxCoords) {
+  //   this.collage = new PricetagDetail(collageBox);
+  // }
+
+  // public get collage() {
+  //   return this.collage;
+  // }
+
+  constructor(original: BBoxCoords) {
+    this.original = new PricetagCoords(original);
+    // this.collage = new PricetagDetail(collage);
+  }
+}
+
 /**
  * A class that represents product.
  * It contains the original and collage pricetags information
  * @param {BBoxCoords} original - The original pricetag bounding box.
  * @param {BBoxCoords} collage - The collage pricetag bounding box.
  */
-export class Product {
-  readonly original: PricetagCoords;
-  public collage?: PricetagDetail;
+export class Product extends ProductBase {
+  // readonly original: PricetagCoords;
+  readonly collage: PricetagDetail;
 
-  name: string | undefined = undefined;
-  priceMain: string | number | undefined = undefined;
-  priceSub: string | number | undefined = undefined;
-
-  public setCollage(collageBox: BBoxCoords) {
-    this.collage = new PricetagDetail(collageBox);
-  }
-
-  // public get collage() {
-  //   return this.collage;
-  // }
-
-  constructor(original: BBoxCoords, collage?: BBoxCoords) {
-    this.original = new PricetagCoords(original);
-    if (collage) this.collage = new PricetagDetail(collage);
+  constructor(original: BBoxCoords, collage: PricetagDetail) {
+    super(original);
+    // this.collage = new PricetagDetail(collage);
+    this.collage = collage;
   }
 }
 

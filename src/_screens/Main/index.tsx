@@ -10,10 +10,17 @@ import { RackDisplay } from "_components";
 function Main() {
   const [photoFile, setPhotoFile] = useState<File>();
 
-  const { showDebugPhoto, showDebugCollage } = useSettingStore(
+  const {
+    showDebugPhoto,
+    showDebugCollage,
+    showCroppedPricetag,
+    showCroppedPricetagDetails,
+  } = useSettingStore(
     (state) => ({
       showDebugPhoto: state.showDebugPhoto,
       showDebugCollage: state.showDebugCollage,
+      showCroppedPricetag: state.showCroppedPricetag,
+      showCroppedPricetagDetails: state.showCroppedPricetagDetails,
     }),
     shallow
   );
@@ -25,16 +32,19 @@ function Main() {
   const [rack, { imgCollageRef, isDetecting }] = useImageToProducts(photoFile, {
     showDebugCollage,
     showDebugPhoto,
+    doPricetagImgs: showCroppedPricetag || showCroppedPricetagDetails,
   });
 
   return (
     <>
-      {!rack ? (
-        <TakingPhoto onPhotoTaken={onPhotoTaken} isDetecting={isDetecting} />
+      {rack ? (
+        <RackDisplay
+          rack={rack}
+          showPricetagImgs={showCroppedPricetag}
+          showPricetagDetailsImgs={showCroppedPricetagDetails}
+        />
       ) : (
-        <>
-          <RackDisplay rack={rack} imgCollageRef={imgCollageRef} />
-        </>
+        <TakingPhoto onPhotoTaken={onPhotoTaken} isDetecting={isDetecting} />
       )}
     </>
   );

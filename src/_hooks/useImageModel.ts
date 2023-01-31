@@ -1,11 +1,11 @@
 import { GraphModel, loadGraphModel } from "@tensorflow/tfjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { drawPredictions } from "_utils/imageProcessing";
-import { executeImageModel, ReshapedOutput } from "_utils/tensor";
+import { executeImageModel, getModelSize, ReshapedOutput } from "_utils/tensor";
 
 type UseModelOptions = {
   isDebug?: boolean; // flag that determines whether to render canvas with predictions
-  canvasSize?: number; // width and height of canvas, if not specified
+  canvasSize?: number; // width and height of canvas, if not specified, it will try to take from model
 };
 
 type UseImageModelReturn = [
@@ -40,14 +40,6 @@ function useImageModel(
     if (modelSource) setModel(modelSource);
   }, [modelSource]);
 
-  // set the canvas size if the `canvasSize` option is passed
-  useEffect(() => {
-    if (canvasSize) {
-      canvasRef.current.width = canvasSize;
-      canvasRef.current.height = canvasSize;
-    }
-  }, [canvasSize]);
-
   useEffect(() => {
     if (isDebug) {
       const htmlBody = document.getElementsByTagName("main")[0] as HTMLElement;
@@ -73,23 +65,20 @@ function useImageModel(
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d", { alpha: false });
 
-    if (canvas && model && ctx) {
-      const result = await executeImageModel(model, canvas);
-      setResult(result);
+    if (!ctx || !model) throw new Error("Image or context not ready");
+    const result = await executeImageModel(model, canvas);
+    setResult(result);
 
-      // Draws the predictions on the canvas if the `debug` option is passed
-      if (isDebug)
-        drawPredictions(
-          canvas,
-          ctx,
-          result.boxes,
-          [...result.scores].map((s) => s.toFixed(2))
-        );
-      return result;
-    } else {
-      console.warn(`Problem with model '${model}' or canvas '${canvas}'`);
-      throw new Error("Model or canvas are not loaded");
-    }
+    // Draws the predictions on the canvas if the `debug` option is passed
+    if (isDebug)
+      drawPredictions(
+        canvas,
+        ctx,
+        result.boxes,
+        [...result.scores].map((s) => s.toFixed(2))
+      );
+
+    return result;
   }, [model, isDebug]);
 
   // getCanvasContext function that can be used to get the 2D rendering context of the canvas
@@ -97,6 +86,17 @@ function useImageModel(
     () => canvasRef.current.getContext("2d", { alpha: false }),
     []
   );
+
+  // set the canvas size if the `canvasSize` option is passed
+  useEffect(() => {
+    if (canvasSize) setCanvasSize(canvasSize);
+    else if (model && getModelSize(model)) {
+      const size = getModelSize(model);
+      if (size) setCanvasSize(size[0]);
+    } else {
+      console.warn("Canvas size not set");
+    }
+  }, [canvasSize, model, setCanvasSize]);
 
   // exports the `canvasRef` and `result` as object properties which allows you to access the canvas element and the result of the execution of the model respectively.
   const functionsObject = useMemo(() => {
@@ -113,3 +113,8 @@ function useImageModel(
 }
 
 export default useImageModel;
+
+// function assertTrue<T extends boolean | undefined>(value: T): asserts value is undefined {
+//   if (value) throw new Error("Assertion failed");
+//   return true;
+// }
