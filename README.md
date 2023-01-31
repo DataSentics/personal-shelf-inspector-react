@@ -15,9 +15,57 @@ This is MVP. Feel free to contact us if you'd like to contribute.
 
 ## Tech
 
-- React (CRA)
+- React + PWA configuration
+- [Chakra-UI](https://ux.stackexchange.com/a/125701) - GUI
+- [tensorflow.js](https://www.tensorflow.org/js) - locating pricetags
+- [tesseract.js](https://github.com/naptha/tesseract.js/) - OCR
 
-## Available Scripts
+## How it works
 
-- napisat ako funguje resizing a volne plochy
-- boxy pro nevidomych - citanie aby fungovalo dobre
+1. User should take photo of shelves with pricetags in shop (user should try to take sharp photo with good quality)
+2. Photo goes through [pricetag model](public/web_models/names_and_prices/model.json) and pricetags are located in original photo
+3. Collage image with found and cropped pricetags is created
+4. Collage image goes through [names&prices model](public/web_models/names_and_prices/model.json) to detect location of product name and price
+5. Then those location are are read with tesseract.js
+6. Results are displayed with correct [ARIA roles](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles) so it can be connected with mobile `TalkBack` and read to person with impaired vision
+
+### Additional info, settings and debugging
+
+#### PWA
+
+This webapp is created as PWA so it can be started in offline mode. To accomplish that some `tesseract.js` source files had to be included in [public/tesseract folder](public/tesseract/). This was inspired by [tesseract.js-offline repo](https://github.com/jeromewu/tesseract.js-offline/). Also you can run command `make copy-tesseract` to update tessract offline source files.
+
+#### Settings
+
+In footer is link to settings where can be found some settings mostly for debugging purposes.
+
+## Development
+
+### Basic commands
+
+```bash
+# help
+make
+
+# start local development server
+make dev
+```
+
+### How to update
+
+- Some configs are hardcoded and can be found in [src/\_constants/index.ts](src/_constants/index.ts)
+- models: can be simply replaced in their location
+- tesseract: latest scripts can be rewritten with `make copy-tesseract` command
+- CICD via [GitHub Actions](.github/workflows/azure-static-web-apps-icy-glacier-028ce5a03.yml) when pushed to branch `main`
+
+## What can be improved in the future
+
+- [service-worker](src/service-worker.ts) caching of ML and Tesseract resources on line 75. At the moment it's just basic configuration and could be improved
+- service worker - in [general caching](https://create-react-app.dev/docs/making-a-progressive-web-app/) and ensuring user has latest version available
+- whole line of product name with price could be read together with mobile [TalkBack](https://support.google.com/accessibility/android/answer/6007100?hl=en)
+  - even [non-standard role](https://ux.stackexchange.com/a/125701) `text` didn't help
+- algorithm to sharpen photo before OCR
+- reducing colors in images for OCR
+- running OCR with [multiple workers](https://github.com/naptha/tesseract.js/blob/master/docs/examples.md#with-multiple-workers-to-speed-up)
+- footer sometimes doesn't render perfectly when debug canvas are rendered or with variable URL bar in browser
+- bug: when in development mode with Hot-Reload and OCR is executed again, somehow pricetags and their values can be mixed betweent themselves
