@@ -15,15 +15,19 @@ function Main() {
     showDebugCollage,
     showCroppedPricetag,
     showCroppedPricetagDetails,
+    allowPhotoGallery,
   } = useSettingStore(
     (state) => ({
       showDebugPhoto: state.showDebugPhoto,
       showDebugCollage: state.showDebugCollage,
       showCroppedPricetag: state.showCroppedPricetag,
       showCroppedPricetagDetails: state.showCroppedPricetagDetails,
+      allowPhotoGallery: state.allowPhotoGallery,
     }),
     shallow
   );
+
+  const inputCapture = allowPhotoGallery ? false : "environment";
 
   const onPhotoTaken = (newPhoto: File) => {
     setPhotoFile(newPhoto);
@@ -44,7 +48,11 @@ function Main() {
           showPricetagDetailsImgs={showCroppedPricetagDetails}
         />
       ) : (
-        <TakingPhoto onPhotoTaken={onPhotoTaken} isDetecting={isDetecting} />
+        <TakingPhoto
+          onPhotoTaken={onPhotoTaken}
+          isDetecting={isDetecting}
+          inputCapture={inputCapture}
+        />
       )}
     </>
   );

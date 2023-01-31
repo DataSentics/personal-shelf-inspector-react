@@ -23,6 +23,10 @@ function Settings() {
         Show cropped pricetag details
       </SettingSwitch>
 
+      <SettingSwitch settingName="allowPhotoGallery">
+        Allow gallery as camera input
+      </SettingSwitch>
+
       <Button to={Paths.HOME} as={RouterLink} mt={5}>
         Go back home
       </Button>

@@ -5,7 +5,8 @@ export type BooleanSettings =
   | "showDebugPhoto"
   | "showDebugCollage"
   | "showCroppedPricetag"
-  | "showCroppedPricetagDetails";
+  | "showCroppedPricetagDetails"
+  | "allowPhotoGallery";
 
 type SettingState = Record<BooleanSettings, boolean> & {
   setBoolSetting: (name: BooleanSettings, newValue: boolean) => void;
@@ -18,6 +19,7 @@ export const useSettingStore = create<SettingState>()(
       showDebugCollage: false,
       showCroppedPricetag: false,
       showCroppedPricetagDetails: false,
+      allowPhotoGallery: false,
       setBoolSetting: (name, newValue) => set(() => ({ [name]: newValue })),
     }),
     { name: "setting-store" }

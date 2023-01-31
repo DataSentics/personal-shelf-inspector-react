@@ -1,17 +1,19 @@
 import { Box, Button, Heading } from "@chakra-ui/react";
+import { InputHTMLAttributes } from "react";
 import { MdPhotoCamera } from "react-icons/md";
 
 import { Camera } from "_components";
 
-const HEADING_TITLE = "Personal \nShelf \nInspector";
+const HEADING_TITLE = "Personala \nShelf \nInspector";
 
 type Props = {
   onPhotoTaken?: (photo: File) => void;
   isDetecting?: boolean;
+  inputCapture?: InputHTMLAttributes<HTMLInputElement>["capture"];
 };
 
 function TakingPhoto(props: Props) {
-  const { onPhotoTaken, isDetecting } = props;
+  const { onPhotoTaken, isDetecting, inputCapture } = props;
 
   return (
     <>
@@ -27,7 +29,7 @@ function TakingPhoto(props: Props) {
       </Heading>
 
       <Box display="flex" justifyContent="flex-start">
-        <Camera onPhotoTaken={onPhotoTaken} inputCapture={false}>
+        <Camera onPhotoTaken={onPhotoTaken} inputCapture={inputCapture}>
           <Button
             isLoading={isDetecting}
             loadingText="Detekuju"
