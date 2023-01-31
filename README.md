@@ -4,7 +4,9 @@
 
 WebApp to help people with impaired vision to recognize and read products' pricetags in shops
 
-## Online version
+## Online demo
+
+[https://personal.shelfinspector.com](https://personal.shelfinspector.com)
 
 ## About
 
