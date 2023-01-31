@@ -33,7 +33,7 @@ function Main() {
     setPhotoFile(newPhoto);
   };
 
-  const [rack, { imgCollageRef, isDetecting }] = useImageToProducts(photoFile, {
+  const [rack, { isDetecting }] = useImageToProducts(photoFile, {
     showDebugCollage,
     showDebugPhoto,
     doPricetagImgs: showCroppedPricetag || showCroppedPricetagDetails,

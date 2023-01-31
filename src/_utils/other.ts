@@ -31,6 +31,6 @@ export class PerfMeter {
   }
 }
 
-export function errorIfNotTrue(condition: boolean | any) {
-  if (condition) throw new Error("Throwing error becase condition not true");
-}
+// export function errorIfNotTrue(condition: boolean | any) {
+//   if (condition) throw new Error("Throwing error becase condition not true");
+// }
