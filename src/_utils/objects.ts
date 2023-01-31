@@ -1,4 +1,5 @@
 import { TypedArray } from "@tensorflow/tfjs";
+import { uuid } from "./other";
 
 // NEW
 export type BBoxCoords = TypedArray | number[];
@@ -105,22 +106,16 @@ export class PricetagDetail extends PricetagCoords {
 
 export class ProductBase {
   readonly original: PricetagCoords;
+  readonly id: string;
   // public collage: PricetagDetail;
 
   name: string | undefined = undefined;
   priceMain: string | number | undefined = undefined;
   priceSub: string | number | undefined = undefined;
 
-  // public setCollage(collageBox: BBoxCoords) {
-  //   this.collage = new PricetagDetail(collageBox);
-  // }
-
-  // public get collage() {
-  //   return this.collage;
-  // }
-
   constructor(original: BBoxCoords) {
     this.original = new PricetagCoords(original);
+    this.id = uuid();
     // this.collage = new PricetagDetail(collage);
   }
 }
