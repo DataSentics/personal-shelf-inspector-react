@@ -37,6 +37,11 @@ export class BBox {
     return [x1, y1, x2, y2];
   }
 
+  public get rectangle() {
+    const { x1, y1, height, width } = this;
+    return { top: y1, left: x1, height, width };
+  }
+
   /**
    * Returns true if the bounding box of this element is fully containing given element.
    * @param {BBox} bbox - the bounding box of the element.

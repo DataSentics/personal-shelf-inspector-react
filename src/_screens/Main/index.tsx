@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { shallow } from "zustand/shallow";
 
-import { useSettingStore } from "_store";
+import { useSettngStoreValues } from "_store";
 import { useImageToProducts } from "_hooks";
 
 import TakingPhoto from "./components/TakingPhoto";
@@ -16,16 +15,7 @@ function Main() {
     showCroppedPricetag,
     showCroppedPricetagDetails,
     allowPhotoGallery,
-  } = useSettingStore(
-    (state) => ({
-      showDebugPhoto: state.showDebugPhoto,
-      showDebugCollage: state.showDebugCollage,
-      showCroppedPricetag: state.showCroppedPricetag,
-      showCroppedPricetagDetails: state.showCroppedPricetagDetails,
-      allowPhotoGallery: state.allowPhotoGallery,
-    }),
-    shallow
-  );
+  } = useSettngStoreValues();
 
   const inputCapture = allowPhotoGallery ? false : "environment";
 

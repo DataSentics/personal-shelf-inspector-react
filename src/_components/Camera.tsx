@@ -32,7 +32,6 @@ function Camera(props: Props) {
 
   const handleCameraChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = event.target;
-    console.log(event.target.clientHeight);
 
     if (files && files[0]) {
       onPhotoTaken?.(files[0]);

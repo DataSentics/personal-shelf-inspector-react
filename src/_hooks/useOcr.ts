@@ -38,17 +38,30 @@ function useOcr() {
   }, []);
 
   const readText = useCallback(
-    async (imageSource: HTMLImageElement, bbox?: BBox) => {
-      // console.log(bbox);
+    async (
+      imageSource: HTMLImageElement,
+      bbox?: BBox,
+      options: { numbersOnly?: boolean } = {}
+    ) => {
+      const { numbersOnly } = options;
 
       if (!bbox) return undefined;
+
       const ocr = ocrRef.current;
-
-      const canvasCtx = getCanvasFromBox(imageSource, bbox);
-
       if (!ocr) throw new Error("Canvas or ocr not ready");
 
-      const result2 = await ocr.recognize(canvasCtx.canvas);
+      if (numbersOnly)
+        // doesn't seem to impact performance noticeably
+        ocr?.setParameters({
+          tessedit_char_whitelist: "0123456789",
+        });
+      else
+        ocr?.setParameters({
+          tessedit_char_whitelist: "",
+        });
+
+      const rectangle = bbox.rectangle;
+      const result2 = await ocr.recognize(imageSource, { rectangle });
 
       return result2;
     },

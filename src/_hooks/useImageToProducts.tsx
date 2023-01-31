@@ -6,6 +6,7 @@ import {
   MODEL_NAME_PRICE_SIZE,
   MODEL_PRICETAG_PATH,
   MODEL_PRICETAG_SIZE,
+  OCR_MIN_CONFIDENCE,
 } from "_constants";
 
 import { createCollage, denormalizeBoxes } from "_utils/imageCalcs";
@@ -24,6 +25,7 @@ import { ReshapedOutput } from "_utils/tensor";
 import useOcr from "./useOcr";
 import useImageModel from "./useImageModel";
 import { PerfMeter } from "_utils/other";
+import { PRODUCT_NAME_NOT_FOUND } from "_constants/words";
 
 type Options = {
   showDebugPhoto?: boolean;
@@ -74,12 +76,7 @@ function useImageToProducts(
   photoFile: File | undefined,
   options: Options = {}
 ): ReturnType {
-  const {
-    showDebugCollage,
-    showDebugPhoto,
-    doPricetagImgs,
-    // doPricetagDetailsImgs,
-  } = options;
+  const { showDebugCollage, showDebugPhoto, doPricetagImgs } = options;
   const [imageUrl, setImageUrl] = useState<string>();
   const imgPhotoRef = useRef<HTMLImageElement>(document.createElement("img"));
   const [rack, setRack] = useState<Rack>();
@@ -104,35 +101,31 @@ function useImageToProducts(
     async (products: Product[], image: HTMLImageElement) => {
       // products.forEach(async (product, index) => {
       for (const product of products) {
-        const nameResult = await ocrReadText(image, product.collage.name);
-        const priceMainResult = await ocrReadText(
-          image,
-          product.collage.priceMain
-        );
-        const priceSubResult = await ocrReadText(
-          image,
-          product.collage.priceSub
-        );
+        let nameRes = await ocrReadText(image, product.collage.name);
+        let priceMainRes = await ocrReadText(image, product.collage.priceMain, {
+          numbersOnly: true,
+        });
+        let priceSubRes = await ocrReadText(image, product.collage.priceSub, {
+          numbersOnly: true,
+        });
 
-        product.name = nameResult?.data.text.trim();
-        product.priceMain = priceMainResult?.data.text.trim();
-        product.priceSub = priceSubResult?.data.text.trim();
+        [nameRes, priceMainRes, priceSubRes] = [
+          nameRes,
+          priceMainRes,
+          priceSubRes,
+        ].map((res) => {
+          return (res?.data.confidence || 0) > OCR_MIN_CONFIDENCE
+            ? res
+            : undefined;
+        });
+
+        product.name = nameRes?.data.text.trim() || PRODUCT_NAME_NOT_FOUND;
+        product.priceMain = priceMainRes?.data.text.trim();
+        product.priceSub = priceSubRes?.data.text.trim();
       }
     },
     [ocrReadText]
   );
-
-  // useEffect(() => {
-  //   async function perform(rack: Rack) {
-  //     // if (rack) {
-  //     const products = rack.products;
-  //     for (const product of products) {
-  //       await updateProductWithImages(product, imgPhotoRef.current);
-  //       // }
-  //     }
-  //   }
-  //   if (doPricetagImgs && rack) perform(rack);
-  // }, [rack, doPricetagImgs]);
 
   const findNamesAndPrices = useCallback(
     async (
@@ -196,17 +189,9 @@ function useImageToProducts(
     );
 
     const rack = guessShelvesMock(unsortedProducts);
-    console.log(rack);
+
     const sortedProducts = rack.products;
 
-    // async function perform(rack: Rack) {
-    //   // if (rack) {
-    //   const products = rack.products;
-    //   for (const product of products) {
-    //     await updateProductWithImages(product, imgPhotoRef.current);
-    //     // }
-    //   }
-    // }
     if (doPricetagImgs && rack) {
       for (const product of sortedProducts) {
         await updateProductWithImages(product, collageImg);
@@ -217,7 +202,7 @@ function useImageToProducts(
     // sortedProducts.forEach(
     //   (product, prodIndex) => (product.collage = pricetagDetails[prodIndex])
     // );
-    const perf = new PerfMeter("OCR main");
+    const perf = new PerfMeter("OCR all");
     await ocrAndUpdateProds(sortedProducts, collageImg);
     perf.end();
 
@@ -236,6 +221,7 @@ function useImageToProducts(
 
   useEffect(() => {
     if (photoFile) {
+      setIsDetecting(true);
       const imgUrl = URL.createObjectURL(photoFile);
 
       setImageUrl(imgUrl);

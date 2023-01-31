@@ -32,3 +32,5 @@ export const ORDINALS = {
     "třinácty",
   ],
 };
+
+export const PRODUCT_NAME_NOT_FOUND = "Název výrobku nedetekován";
