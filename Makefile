@@ -5,6 +5,9 @@
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+TESSERACT_PATH := public/tesseract
+TESSERACT_LANG_PATH := "$(TESSERACT_PATH)/lang_data"
+
 # IMAGE_NAME := loreal-frontend
 
 dev: ## Start local dev server
@@ -13,3 +16,9 @@ dev: ## Start local dev server
 install: ## Install deps from package.json
 	npm i
 
+copy-tesseract: ## Copy latest teseract files to public/scripts folder
+	@cp 'node_modules/tesseract.js/dist/worker.min.js' $(TESSERACT_PATH)
+	@cp 'node_modules/tesseract.js-core/tesseract-core.wasm.js' $(TESSERACT_PATH)
+	@curl https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata -LJ --output "$(TESSERACT_LANG_PATH)/eng.traineddata"
+	@curl https://github.com/tesseract-ocr/tessdata/raw/main/ces.traineddata -LJ --output "$(TESSERACT_LANG_PATH)/ces.traineddata"
+	

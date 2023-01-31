@@ -6,12 +6,19 @@ import { getCanvasFromBox } from "_utils/imageProcessing";
 import { BBox } from "../_utils/objects";
 import { PerfMeter } from "../_utils/other";
 
+const workerPath = "tesseract/worker.min.js";
+const langPath = "tesseract/lang_data";
+const corePath = "tesseract/tesseract-core.wasm.js";
+
 function useOcr() {
   const ocrRef = useRef<Tesseract.Worker>();
 
   useEffect(() => {
     const init = async () => {
       const worker = await createWorker({
+        workerPath,
+        langPath,
+        corePath,
         // logger: (m) => console.log(m),
       });
       ocrRef.current = worker;
