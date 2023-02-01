@@ -59,6 +59,7 @@ function ProductDisplay(props: Props) {
       backgroundColor={isEven ? "gray.100" : undefined}
       padding={2}
       borderRadius="md"
+      role="listitem"
       _hover={{ bg: "gray.200" }}
     >
       <Box display="flex" alignItems="center" justifyContent="space-between">

@@ -18,7 +18,9 @@ export default function RackDisplay(props: Props) {
 
   return (
     <>
-      <Heading mb={6}>Regály</Heading>
+      <Heading mt={2} mb={6}>
+        Regály
+      </Heading>
 
       <Tabs variant="enclosed" onChange={setTabIndex}>
         <TabList flexWrap="wrap">
@@ -27,12 +29,13 @@ export default function RackDisplay(props: Props) {
           ))}
         </TabList>
 
-        {/* Chakra-UI TabPanel(s) are not use as the messup TalkBack reading of data inside */}
+        {/* Chakra-UI TabPanel(s) are not use as it messes-up TalkBack reading of data inside */}
         {rack.shelves.map((shelf, index) => (
           <Stack
             spacing={0}
             key={`TabPanel_${index}`}
             hidden={index !== tabIndex}
+            role="list"
           >
             {shelf.map((product, productIndex) => (
               <ProductDisplay
