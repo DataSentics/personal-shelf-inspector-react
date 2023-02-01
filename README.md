@@ -61,6 +61,8 @@ make dev
 ## Need to be fixed
 
 - sorting products correctly into shelf. WIP can be found under `feat/sort_to_shelves` branch. It's copied and updated from `personal-shelf-native` app. Should be probbaly refuctored & fixed. Now it's randomly sorted
+  - this code was heavily inspired from original ReactNative app for PersonalShelfInspector (so there you can see original code)
+  - now it's completely done in function `guessShelves()` which at the end calls function `quessShelvesMocking()` so it's sorting randomly (so it at least looks somehow usable in GUI). At the end function should add `shelfRank` property and based on this it should sort products. So either I copied code incorrectly, or it's working but I didn't understand purpose of this `shelfRank` variable. Maybe it would be worth to compare output of Native app and after that fix it.
 
 ## What can be improved in the future
 
