@@ -58,6 +58,10 @@ make dev
 - tesseract: latest scripts can be rewritten with `make copy-tesseract` command
 - CICD via [GitHub Actions](.github/workflows/azure-static-web-apps-icy-glacier-028ce5a03.yml) when pushed to branch `main`
 
+## Need to be fixed
+
+- sorting products correctly into shelf. WIP can be found under `feat/sort_to_shelves` branch. It's copied and updated from `personal-shelf-native` app. Should be probbaly refuctored & fixed. Now it's randomly sorted
+
 ## What can be improved in the future
 
 - [service-worker](src/service-worker.ts) caching of ML and Tesseract resources on line 75. At the moment it's just basic configuration and could be improved
