@@ -1,62 +1,64 @@
-// import { Product, ProductOnShelf, RectCoords } from "./objects";
+// // import { Product, ProductOnShelf, RectCoords } from "./objects";
 
-type BoxCoords = [number, number, number, number] | Array<number>; // x1, y1, x2, y2
+import { Product } from "./objects";
 
-export type RectCoords = BoxCoords;
+// type BoxCoords = [number, number, number, number] | Array<number>; // x1, y1, x2, y2
 
-type Rectangle = {
-  coords: BoxCoords;
-};
+// export type RectCoords = BoxCoords;
 
-// class Roi implements Rectangle {
-//   coords: RectCoords;
-//   score: number;
-
-//   constructor(coords: RectCoords, score: number) {
-//     this.coords = coords;
-//     this.score = score;
-//   }
-// }
-
-export type Roi = Rectangle & { score: number };
-
-// export type DetectedPriceTag = Roi & {
-//   //   constructor(coords: RectCoords, score: number) {
-//   //     super(coords, score);
-//   //   }
-//   shelfNumber: number;
+// type Rectangle = {
+//   coords: BoxCoords;
 // };
 
-export type Product = {
-  pricetag: Roi;
-};
+// // class Roi implements Rectangle {
+// //   coords: RectCoords;
+// //   score: number;
 
-export type ProductOnShelf = Product & {
-  shelfRow: number;
-};
-// const sortBy;
+// //   constructor(coords: RectCoords, score: number) {
+// //     this.coords = coords;
+// //     this.score = score;
+// //   }
+// // }
 
-// type ProductWithQY = {
-//   quantiziedY: number;
+// export type Roi = Rectangle & { score: number };
+
+// // export type DetectedPriceTag = Roi & {
+// //   //   constructor(coords: RectCoords, score: number) {
+// //   //     super(coords, score);
+// //   //   }
+// //   shelfNumber: number;
+// // };
+
+// export type Product = {
+//   pricetag: Roi;
+// };
+
+// export type ProductOnShelf = Product & {
+//   shelfRow: number;
+// };
+// // const sortBy;
+
+// // type ProductWithQY = {
+// //   quantiziedY: number;
+// //   product: Product;
+// // };
+
+// type ProductMetaBase = {
 //   product: Product;
 // };
 
-type ProductMetaBase = {
-  product: Product;
-};
+// type ProductMeta = ProductMetaBase & {
+//   quantiziedY: number;
+//   roiCenter: [number, number];
+// };
 
-type ProductMeta = ProductMetaBase & {
-  quantiziedY: number;
-  roiCenter: [number, number];
-};
+// type ProductMetaWithAngle = ProductMeta & {
+//   angle: number | undefined;
+// };
 
-type ProductMetaWithAngle = ProductMeta & {
-  angle: number | undefined;
-};
-
-type ProductMetaWithAngleAndShelf = ProductMetaWithAngle & {
-  shelfRow: number;
-};
+// type ProductMetaWithAngleAndShelf = ProductMetaWithAngle & {
+//   shelfRow: number;
+// };
 
 const SOME_QUANTIZATION_CONSTANT = 3;
 const ALLOWED_DEVIATION_FROM_MEDIAN_ANGLE = 0.14; //in radians todo test if some value better
@@ -65,118 +67,153 @@ const SHARP_ANGLE_UP = 0.78; //in radians
 const mean = (values: number[]): number =>
   values.reduce((a, b) => a + b, 0) / values.length;
 
+// export interface WrappedProduct<T extends Product> {
+//   product: T;
+// }
+
+export type WrappedProductType = { product: Product };
+
+type WrapQuantizied<T extends WrappedProductType> = T & { quantiziedY: number };
+type WithAngle<T extends WrappedProductType> = T & {
+  angle: number | undefined;
+};
+type WithRank<T extends WrappedProductType> = T & { shelfRank: number };
+
+export function wrapProducts(products: Product[]): WrappedProductType[] {
+  return products.map((product) => ({ product }));
+}
+
+// type A = { a: number };
+// type B = { b: number };
+// const a: A & B = { a: 1 };
+
+// type Wrap<T extends >
 /**
  * Sometimes detected pricetags are not sorted left to right correctly in the shelves, when first sorted top to bottom.
  * That may be, because pricetags with similar Y coords end up being detected slightly higher or lower than their neighbours on the shelves.
  * We solve this by quantizing Y coords of the detected pricetags,
  * so we can later sort pricetags with same quantized Y by their X coord value.
 
- * @param products 
+ * @param products
  * @returns List of products with quantizied y1 coord
  */
-export const addQuantiziedYCoords = <T extends ProductMetaBase>(
-  productMetas: T[]
-): Array<T & { quantiziedY: number }> => {
-  const boxes = productMetas.map((meta) => meta.product.pricetag.coords);
-  const boxesHeights = boxes.map(([_x1, y1, _x2, y2]) => y2 - y1);
-  const avarageHeight = mean(boxesHeights);
+export function addQuantiziedYCoords<T extends WrappedProductType>(
+  wrappedProducts: T[]
+): Array<WrapQuantizied<T>> {
+  const boxesHeightMean = mean(
+    wrappedProducts.map((prodWrap) => {
+      const box = prodWrap.product.original.bbox;
+      return box.y2 - box.y1;
+    })
+  );
+  // const boxesHeights = boxes.map(([_x1, y1, _x2, y2]) => y2 - y1);
+  // const heightMean = mean(boxes.map((box) => box.y2 - box.y1));
+  // const heightMean2 = boxes.map((box) => box.y2 - box.y1);
   const quantizationStepSize = Math.floor(
-    avarageHeight / SOME_QUANTIZATION_CONSTANT
+    boxesHeightMean / SOME_QUANTIZATION_CONSTANT
   );
 
-  const productsWithQY = productMetas.map((meta) => ({
-    ...meta,
-    quantiziedY: meta.product.pricetag.coords[1] * quantizationStepSize,
-  }));
-
-  return productsWithQY;
-};
-
-const getRectCenter = (coords: number[]): [number, number] => {
-  const [x1, y1, x2, y2] = coords;
-  return [x2 - x1, y2 - y1];
-};
-
-export const addPriceTagCenter = <T extends ProductMetaBase>(
-  productMetas: T[]
-): Array<T & { roiCenter: [number, number] }> => {
-  const withCenters = productMetas.map((meta) => {
-    const { coords } = meta.product.pricetag;
-
-    return { ...meta, roiCenter: getRectCenter(coords) };
+  const productsWithQY = wrappedProducts.map((prodWrap) => {
+    return {
+      ...prodWrap,
+      quantiziedY:
+        Math.floor(prodWrap.product.original.bbox.y2 / quantizationStepSize) *
+        quantizationStepSize,
+    };
   });
 
-  return withCenters;
-};
+  return productsWithQY;
+}
 
-/**
- * Sorts list of detected pricetags based on their y coord in the original image
- */
-export const sortPricetagsTopToBottom = (
-  productMetas: ProductMeta[]
-): ProductMeta[] =>
-  productMetas.sort((a, b) => a.roiCenter[1] - b.roiCenter[1]);
 
-/**
- * Now I have shelve numbers assigned to all products
- * time to sort each shelve left to right
- */
-export const sortShelvesLeftToRight = (
-  productMetas: ProductMetaWithAngleAndShelf[]
-): ProductMetaWithAngleAndShelf[] =>
-  productMetas.sort(
-    (
-      { shelfRow: shelfA, roiCenter: roiA },
-      { shelfRow: shelfB, roiCenter: roiB }
-    ) => (shelfA === shelfB ? roiA[0] - roiB[0] : shelfA - shelfB)
+
+// /**
+//  * Sorts list of detected pricetags based on their y coord in the original image
+//  */
+export function sortPricetagsTopToBottom<T extends WrappedProductType>(
+  prodsWrap: Array<T>
+): T[] {
+  return prodsWrap.sort(
+    ({ product: { original: origA } }, { product: { original: origB } }) =>
+      origA.bbox.center.y - origB.bbox.center.y
   );
+}
+
+// /**
+//  * Now I have shelve numbers assigned to all products
+//  * time to sort each shelve left to right
+//  */
+export function sortShelvesLeftToRight<T extends WithRank<WrappedProductType>>(
+  products: T[]
+): T[] {
+  return products.sort(
+    (
+      { shelfRank: rankA, product: { original: origA } },
+      { shelfRank: rankB, product: { original: origB } }
+    ) =>
+      rankA === rankB
+        ? origA.bbox.center.x - origB.bbox.center.x
+        : rankA - rankB
+  );
+}
 
 enum SortDirection {
   LEFT_TO_RIGHT = "leftToRight",
   RIGHT_TO_LEFT = "rightToLeft",
 }
 
-/**
- * Input: detected pricetag list sorted by Y coord value.
- * Sort detected pricetag images with the same Y coord (presumably located on the same shelve)
- * LEFT_TO_RIGHT or RIGHT_TO_LEFT by  their X coord
- */
-export const sortPricetagsHorizontally = (
-  productMetas: ProductMeta[],
+// /**
+//  * Input: detected pricetag list sorted by Y coord value.
+//  * Sort detected pricetag images with the same Y coord (presumably located on the same shelve)
+//  * LEFT_TO_RIGHT or RIGHT_TO_LEFT by  their X coord
+//  */
+export function sortPricetagsHorizontally<T extends WrappedProductType>(
+  products: WrapQuantizied<T>[],
   direction: SortDirection = SortDirection.LEFT_TO_RIGHT
-): ProductMeta[] => {
-  return productMetas.sort(
+): WrapQuantizied<T>[] {
+  return products.sort(
     (
-      { quantiziedY: qyA, roiCenter: roiA },
-      { quantiziedY: qyB, roiCenter: roiB }
-    ) => {
-      if (qyA === qyB) {
-        return direction == SortDirection.LEFT_TO_RIGHT
-          ? roiA[0] - roiB[0]
-          : roiB[0] - roiA[0];
+      {
+        quantiziedY: aQuant,
+        product: {
+          original: { bbox: boxA },
+        },
+      },
+      {
+        quantiziedY: bQuant,
+        product: {
+          original: { bbox: boxB },
+        },
       }
-      return qyA - qyB;
+    ) => {
+      if (aQuant === bQuant) {
+        return direction == SortDirection.LEFT_TO_RIGHT
+          ? boxA.center.x - boxB.center.x
+          : boxB.center.x - boxA.center.x;
+      }
+      return aQuant - bQuant;
     }
   );
-};
 
-/**
- * Depending on angle of camera, when capturing image
- * the shelves are usually tilted not perfectly horizontal
- * We want to know if this is LEFT_TO_RIGHT or RIGHT_TO_LEFT ->
- * which side of shelve on the photo has higher y coord value?
- */
-export const getShelfSortingDirection = (
-  productMetas: ProductMeta[]
-): SortDirection => {
+}
+
+// /**
+//  * Depending on angle of camera, when capturing image
+//  * the shelves are usually tilted not perfectly horizontal
+//  * We want to know if this is LEFT_TO_RIGHT or RIGHT_TO_LEFT ->
+//  * which side of shelve on the photo has higher y coord value?
+//  */
+export function getShelfSortingDirection<T extends WrappedProductType>(
+  productMetas: T[]
+): SortDirection {
   let lefToRigthCount = 0;
   let rightToLeftCount = 0;
 
-  productMetas.forEach(({ roiCenter, quantiziedY }, index, products) => {
+  productMetas.forEach(({ product }, index, products) => {
     if (index > 0) {
-      const currImgCoords = roiCenter;
-      const prevImgCoords = products[index - 1].roiCenter;
-      currImgCoords[0] > prevImgCoords[0]
+      const currBox = product.original.bbox;
+      const prevBox = products[index - 1].product.original.bbox;
+      currBox.center.x > prevBox.center.y
         ? (lefToRigthCount += 1)
         : (rightToLeftCount += 1);
     }
@@ -188,32 +225,28 @@ export const getShelfSortingDirection = (
   return lefToRigthCount > rightToLeftCount
     ? SortDirection.LEFT_TO_RIGHT
     : SortDirection.RIGHT_TO_LEFT;
-};
+}
 
-/**
- * - input arg - pricetags sorted top to bottom
- * - computing angles between pricetags that are vertically closest to each other
- * - helps us guess under what angle is image taken - what angle are shelves with products on them
- */
+// /**
+//  * - input arg - pricetags sorted top to bottom
+//  * - computing angles between pricetags that are vertically closest to each other
+//  * - helps us guess under what angle is image taken - what angle are shelves with products on them
+//  */
 export const addAngleToNextPricetag = (
-  productMetas: ProductMeta[]
-): ProductMetaWithAngle[] => {
-  const result = productMetas.map(({ roiCenter, ...rest }, index, products) => {
+  productMetas: WrappedProductType[]
+): Array<WrappedProductType & { angle: number | undefined }> => {
+  const result = productMetas.map(({ product, ...rest }, index, products) => {
     let angle = undefined;
     if (index < products.length - 1) {
-      const pricetagCoords = roiCenter;
-      const nextPricetagCoords = products[index + 1].roiCenter;
-      console.log(
-        (nextPricetagCoords[1], pricetagCoords[1]),
-        (nextPricetagCoords[0], pricetagCoords[0])
-      );
+      const currBox = product.original.bbox;
+      const nextBox = products[index + 1].product.original.bbox;
 
       angle = Math.atan(
-        (nextPricetagCoords[1] - pricetagCoords[1]) /
-          (nextPricetagCoords[0] - pricetagCoords[0])
+        (nextBox.center.y - currBox.center.y) /
+          (nextBox.center.x - currBox.center.x)
       );
     }
-    return { roiCenter, angle, ...rest };
+    return { angle, product, ...rest };
   });
 
   return result;
@@ -226,8 +259,10 @@ export const addAngleToNextPricetag = (
  * when he captured the photo
  * - useful when determining on which shelve each pricetag is
  */
-export const getMedianAngle = (productsOnShelves: ProductMetaWithAngle[]) => {
-  const medianAngle = productsOnShelves
+export function getMedianAngle<T extends WrappedProductType>(
+  products: WithAngle<T>[]
+) {
+  const medianAngle = products
     .map(({ angle }) => angle)
     .sort(function (a, b) {
       //last image has no angle to next image, needs to be sorted last
@@ -238,14 +273,13 @@ export const getMedianAngle = (productsOnShelves: ProductMetaWithAngle[]) => {
         return 1;
       }
       return a - b;
-    })[Math.floor((productsOnShelves.length - 1) / 2)];
+    })[Math.floor((products.length - 1) / 2)];
   return medianAngle || 0;
-};
+}
 
-export const assignDetectedProductsToShelves = (
-  productMetas: ProductMetaWithAngle[],
-  medianAngle: number
-): ProductMetaWithAngleAndShelf[] => {
+export function assignDetectedProductsToShelves<
+  T extends WithAngle<WrappedProductType>
+>(products: Array<T>, medianAngle: number): Array<T & { shelfRank: number }> {
   /**
    * - pricetags are sorted top to bottom
    * - if the angle to next pricetag does not deviate too much from median, it means the pricetag is probably on the same shelve
@@ -256,11 +290,12 @@ export const assignDetectedProductsToShelves = (
   const LOWER_BOUND = medianAngle - ALLOWED_DEVIATION_FROM_MEDIAN_ANGLE;
 
   let currentShelf = 1; // numbering shelves top to bottom
-  const result = productMetas.map(({ angle, ...rest }) => {
-    const shelfNumber = currentShelf;
+  const result = products.map((prod) => {
+    const shelfRank = currentShelf;
+    const angle = prod.angle;
     console.log(angle);
 
-    if (angle != undefined) {
+    if (angle !== undefined) {
       if (
         angle > SHARP_ANGLE_UP ||
         angle < -SHARP_ANGLE_UP ||
@@ -270,12 +305,14 @@ export const assignDetectedProductsToShelves = (
         currentShelf += 1;
       }
     }
-    return { angle, shelfRow: shelfNumber, ...rest };
+    return { ...prod, shelfRank };
   });
 
   //last product is assigned to the last shelve as it does not have angleToNextImage value
-  if (result.length > 0) {
-    result[result.length - 1].shelfRow = currentShelf;
-  }
+  // if (result.length > 0) {
+  //   result[result.length - 1].shelfRow = currentShelf;
+  // }
   return result;
-};
+}
+
+export const x = 1;

@@ -19,7 +19,7 @@ import {
 } from "_utils/imageProcessing";
 import { BBox, PricetagDetail, Product, Rack } from "_utils/objects";
 import { addDetailsToPricetags } from "_utils/pricetags";
-import { guessShelvesMock } from "_utils/shelves";
+import { guessShelves } from "_utils/shelves";
 import { ReshapedOutput } from "_utils/tensor";
 
 import useOcr from "./useOcr";
@@ -187,7 +187,7 @@ function useImageToProducts(
       (rBox, rBoxIndex) => new Product(rBox, pricetagDetails[rBoxIndex])
     );
 
-    const rack = guessShelvesMock(unsortedProducts);
+    const rack = guessShelves(unsortedProducts);
 
     const sortedProducts = rack.products;
 

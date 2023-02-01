@@ -42,6 +42,16 @@ export class BBox {
     return { top: y1, left: x1, height, width };
   }
 
+  public get centerArr(): [number, number] {
+    const { x1, y1, x2, y2 } = this;
+    return [x2 - x1, y2 - y1];
+  }
+
+  public get center(): { x: number; y: number } {
+    const center = this.centerArr;
+    return { x: center[0], y: center[1] };
+  }
+
   /**
    * Returns true if the bounding box of this element is fully containing given element.
    * @param {BBox} bbox - the bounding box of the element.
