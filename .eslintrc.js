@@ -10,6 +10,7 @@ module.exports = {
     "plugin:react/jsx-runtime",
     "plugin:react-hooks/recommended",
     "plugin:@typescript-eslint/recommended",
+    "prettier",
   ],
   overrides: [],
   parser: "@typescript-eslint/parser",
