@@ -19,12 +19,12 @@ import {
 } from "_utils/imageProcessing";
 import { BBox, PricetagDetail, Product, Rack } from "_utils/objects";
 import { addDetailsToPricetags } from "_utils/pricetags";
-import { guessShelvesMock } from "_utils/shelves";
+import { findShelves } from "_utils/shelves";
 import { ReshapedOutput } from "_utils/tensor";
 
 import useOcr from "./useOcr";
 import useImageModel from "./useImageModel";
-import { PerfMeter } from "_utils/other";
+import { createPairingMap, PerfMeter } from "_utils/other";
 import { PRODUCT_NAME_NOT_FOUND } from "_constants/words";
 
 type Options = {
@@ -126,6 +126,9 @@ function useImageToProducts(
     [ocrReadText]
   );
 
+  /**
+   * Create Array PriceTag details for given @boxes parameter, returned in same order
+   */
   const findNamesAndPrices = useCallback(
     async (
       boxes: (TypedArray | number[])[]
@@ -142,13 +145,13 @@ function useImageToProducts(
       // draw original boxes to canvas
       drawBoxesToCanvas(image, ctx, boxes, collage.boxes);
 
-      // create img element with full size colage
+      // create img element with full size collage
       const collageImg = await imageElemFromCanvas(canvas);
 
       // for debugging purposes
       imgCollageRef.current = collageImg;
 
-      // resize canvas before model processing and redraw callage image
+      // resize canvas before model processing and redraw collage image
       namePriceFuncs.setCanvasSize(MODEL_NAME_PRICE_SIZE || originalSize);
       drawImageToCanvas(collageImg, ctx);
 
@@ -159,7 +162,9 @@ function useImageToProducts(
         collageImg.naturalHeight
       );
 
-      const pricetags = collage.boxes.map((rBox) => new PricetagDetail(rBox));
+      const pricetags = collage.boxes.map(
+        (realBox) => new PricetagDetail(realBox)
+      );
       addDetailsToPricetags(pricetags, realBoxes, result.classes);
 
       return [pricetags, collageImg];
@@ -180,43 +185,77 @@ function useImageToProducts(
       image.naturalHeight
     );
 
-    // const unsortedProducts = realBoxes.map((rBox) => new Product(rBox));
-    const [pricetagDetails, collageImg] = await findNamesAndPrices(realBoxes);
+    return realBoxes;
+  }, [pricetagFuncs]);
 
-    const unsortedProducts = realBoxes.map(
-      (rBox, rBoxIndex) => new Product(rBox, pricetagDetails[rBoxIndex])
+  const mainFunction = useCallback(async () => {
+    const priceTagCoords = await findPriceTags();
+    const priceTagBBoxes = priceTagCoords.map((coords) => new BBox(coords));
+
+    const perfMeter = new PerfMeter("general");
+
+    // const origCollagePairs =
+
+    // const unsortedProducts = realBoxes.map((rBox) => new Product(rBox));
+    const [pricetagDetails, collageImg] = await findNamesAndPrices(
+      priceTagCoords
     );
 
-    const rack = guessShelvesMock(unsortedProducts);
+    const priceTagDetailPairs = createPairingMap(
+      priceTagBBoxes,
+      pricetagDetails
+    );
 
-    const sortedProducts = rack.products;
+    const priceTagsShelves = findShelves(priceTagBBoxes);
 
-    if (doPricetagImgs && rack) {
-      for (const product of sortedProducts) {
-        await updateProductWithImages(product, collageImg);
-        // }
-      }
+    const productsOnShelves = priceTagsShelves.map((shelf) =>
+      shelf.map(
+        (priceTagBBox) =>
+          new Product(priceTagBBox, priceTagDetailPairs.get(priceTagBBox))
+      )
+    );
+
+    const products = productsOnShelves.flat();
+
+    if (doPricetagImgs) {
+      perfMeter.start("generate images");
+      await Promise.allSettled(
+        Array.from(
+          products,
+          async (product) => await updateProductWithImages(product, collageImg)
+        )
+      );
+      perfMeter.end();
     }
 
     // sortedProducts.forEach(
     //   (product, prodIndex) => (product.collage = pricetagDetails[prodIndex])
     // );
-    const perf = new PerfMeter("OCR all");
-    await ocrAndUpdateProds(sortedProducts, collageImg);
-    perf.end();
+    perfMeter.start("OCR all");
+    await ocrAndUpdateProds(products, collageImg);
+    perfMeter.end();
 
-    setRack(rack);
+    const rack = new Rack(productsOnShelves);
+
     console.log(rack);
-  }, [findNamesAndPrices, pricetagFuncs, ocrAndUpdateProds, doPricetagImgs]);
+    setRack(rack);
+    // console.log(rack);
+  }, [
+    findNamesAndPrices,
+    // pricetagFuncs,
+    ocrAndUpdateProds,
+    doPricetagImgs,
+    findPriceTags,
+  ]);
 
   const startDetection = useCallback(async () => {
     try {
       setIsDetecting(true);
-      await findPriceTags();
+      await mainFunction();
     } finally {
       setIsDetecting(false);
     }
-  }, [findPriceTags]);
+  }, [mainFunction]);
 
   useEffect(() => {
     if (photoFile) {

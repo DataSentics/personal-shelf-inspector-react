@@ -29,3 +29,9 @@ export const OCR_TESSERACT_LANG = "ces+eng"; // czech + english
 // https://github.com/tesseract-ocr/tesseract/blob/4.0.0/src/ccstruct/publictypes.h#L268
 export const OCR_ENGINE_MODE = OEM.LSTM_ONLY; // seems to give better results
 export const OCR_MIN_CONFIDENCE = 50;
+
+// Find shelves
+// Most common (slope) angle between price-tags tolerance
+export const FIND_SHELVES_DEGREE_TOLERANCE = 1;
+// Distance to search for price-tags on given line. Multiplies price-tags average height
+export const FIND_PRICE_TAG_DISTANCE_TOLERANCE_MULTIPLIER = 1.5;

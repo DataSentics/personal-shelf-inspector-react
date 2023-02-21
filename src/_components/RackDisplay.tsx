@@ -39,7 +39,7 @@ export default function RackDisplay(props: Props) {
           >
             {shelf.map((product, productIndex) => (
               <ProductDisplay
-                key={`PrdcOnShelf_${product.id}`}
+                key={`PrdcOnShelf_${product._id}`}
                 product={product}
                 pricetagImgs={showPricetagImgs}
                 pricetagDetailsImgs={showPricetagDetailsImgs}

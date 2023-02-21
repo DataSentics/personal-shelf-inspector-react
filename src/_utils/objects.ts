@@ -1,8 +1,36 @@
 import { TypedArray } from "@tensorflow/tfjs";
 import { uuid } from "./other";
+import UUID from "./uuid";
 
 // NEW
-export type BBoxCoords = TypedArray | number[];
+export type BBoxCoordsExact = [number, number, number, number];
+export type BBoxCoords = TypedArray | number[] | BBoxCoordsExact; // | [number,number,number,number]
+
+export type Roi = { score: number; coords: BBoxCoords };
+
+export interface PointBase {
+  readonly x: number;
+  readonly y: number;
+}
+export class Point implements PointBase {
+  readonly x: number;
+  readonly y: number;
+
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+
+  public get coords() {
+    return [this.x, this.y];
+  }
+
+  // public sameAs(point: PointBase) {
+  //   return this.x === point.x && this.y === point.y;
+  // }
+}
+
+export type LinePoints = Array<PointBase>;
 
 /**
  * A class that represents a bounding box.
@@ -42,6 +70,16 @@ export class BBox {
     return { top: y1, left: x1, height, width };
   }
 
+  public get center(): Point {
+    const { x1, y1, x2, y2 } = this;
+    return new Point((x2 - x1) / 2 + x1, (y2 - y1) / 2 + y1);
+  }
+
+  public get leftBottom(): Point {
+    const { x1, y2 } = this;
+    return new Point(x1, y2);
+  }
+
   /**
    * Returns true if the bounding box of this element is fully containing given element.
    * @param {BBox} bbox - the bounding box of the element.
@@ -74,11 +112,15 @@ enum PriceDetailClass {
  * @param {BBoxCoords} bboxCoordinates - the coordinates of the pricetag.
  */
 export class PricetagCoords {
-  bbox: BBox;
+  readonly bbox: BBox;
   // private _imageUrl?: string; // path to file
 
-  constructor(bboxCoordinates: BBoxCoords) {
-    this.bbox = new BBox(bboxCoordinates);
+  constructor(bbox: BBox | BBoxCoords) {
+    if (Array.isArray(bbox)) {
+      this.bbox = new BBox(bbox);
+    } else {
+      this.bbox = bbox as BBox;
+    }
   }
 }
 
@@ -111,16 +153,15 @@ export class PricetagDetail extends PricetagCoords {
 
 export class ProductBase {
   readonly original: PricetagCoords;
-  readonly id: string;
-  // public collage: PricetagDetail;
+  public readonly _id: string;
 
   name: string | undefined = undefined;
   priceMain: string | number | undefined = undefined;
   priceSub: string | number | undefined = undefined;
 
-  constructor(original: BBoxCoords) {
+  constructor(original: BBox) {
     this.original = new PricetagCoords(original);
-    this.id = uuid();
+    this._id = uuid();
     // this.collage = new PricetagDetail(collage);
   }
 }
@@ -128,31 +169,19 @@ export class ProductBase {
 /**
  * A class that represents product.
  * It contains the original and collage pricetags information
- * @param {BBoxCoords} original - The original pricetag bounding box.
+ * @param {BBox} original - The original pricetag bounding box.
  * @param {BBoxCoords} collage - The collage pricetag bounding box.
  */
 export class Product extends ProductBase {
   // readonly original: PricetagCoords;
   readonly collage: PricetagDetail;
 
-  constructor(original: BBoxCoords, collage: PricetagDetail) {
+  constructor(original: BBox, collage: PricetagDetail) {
     super(original);
     // this.collage = new PricetagDetail(collage);
     this.collage = collage;
   }
 }
-
-// export class Shelf {
-//   // products: Array<Product>;
-
-//   constructor(public products: Array<Product> = []) {
-//     // this.products = products;
-//   }
-
-//   public addProduct(product: Product) {
-//     this.products.push(product);
-//   }
-// }
 
 type Shelf = Array<Product>;
 
@@ -160,8 +189,10 @@ export class Rack {
   constructor(public shelves: Array<Shelf> = []) {}
 
   public get products(): Product[] {
-    return this.shelves.reduce((acc, shelf) => {
-      return [...acc, ...shelf];
-    }, [] as Product[]);
+    return this.shelves.flat();
   }
 }
+
+export const getBoxLeftBottom = (bBox: BBox): PointBase => bBox.leftBottom;
+// const getBoxHeight = (bBox: BBox): number => bBox.height;
+export const getPointX = (point: PointBase): number => point.x;
