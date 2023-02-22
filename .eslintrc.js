@@ -24,9 +24,19 @@ module.exports = {
     "linebreak-style": ["error", "unix"],
     quotes: ["error", "double"],
     semi: ["error", "always"],
-    // "no-unused-vars": ["warn", { varsIgnorePattern: "^_" }],
-    "@typescript-eslint/no-unused-vars": ["warn", { varsIgnorePattern: "^_" }],
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+      },
+    ],
     "prefer-const": ["warn"],
+    // "@typescript-eslint/consistent-type-imports": [
+    //   "error",
+    //   { prefer: "type-imports" },
+    // ],
   },
   settings: {
     react: {

@@ -1,5 +1,7 @@
-import { Box, Stack, Text } from "@chakra-ui/react";
-import { Product } from "_utils/objects";
+import { Box, Stack, Text, useColorModeValue } from "@chakra-ui/react";
+import { isNil } from "remeda";
+
+import type { Product } from "_utils/objects";
 
 type Props = {
   product: Product;
@@ -19,7 +21,7 @@ function ProductImageDisplay(props: ProductImageDisplayProps) {
   if (!pricetagImgs && !pricetagDetailsImgs) return null;
 
   return (
-    <Stack direction="row" wrap="wrap">
+    <Stack direction="row" wrap="wrap" justifyContent="center">
       {pricetagImgs && (
         <img alt="Cenovka produktu" src={product.collage.bbox.imageUrl} />
       )}
@@ -51,22 +53,41 @@ function ProductImageDisplay(props: ProductImageDisplayProps) {
   );
 }
 
+const DISPLAY_CURRENCY = "Kč";
+
 function ProductDisplay(props: Props) {
   const { product, isEven, pricetagImgs, pricetagDetailsImgs } = props;
 
+  const bgColorMode = useColorModeValue("blackAlpha.200", "whiteAlpha.400");
+  const bgColorModeHover = useColorModeValue("gray.200", "whiteAlpha.200");
+  const backgroundColor = isEven ? bgColorMode : undefined;
+
+  const { priceMain, priceSub } = product;
+
+  const priceString = isNil(priceMain)
+    ? "Nenalenzena"
+    : `${priceMain}.${priceSub ?? 0}${DISPLAY_CURRENCY}`;
+
   return (
     <Box
-      backgroundColor={isEven ? "gray.100" : undefined}
-      padding={2}
+      // backgroundColor="whiteAlpha.300"
+      backgroundColor={backgroundColor}
+      padding={6}
       borderRadius="md"
       role="listitem"
-      _hover={{ bg: "gray.200" }}
+      _hover={{ bg: bgColorModeHover }}
     >
-      <Box display="flex" alignItems="center" justifyContent="space-between">
-        <Text>{product.name}</Text>
-        <Box backgroundColor="dsPrimary.300" borderRadius="md" padding={3}>
-          {product.priceMain}.{product.priceSub}Kč
-        </Box>
+      <Box display="flex" flexDirection="column">
+        <Text as="span" fontSize="xl">
+          {product.name}.
+        </Text>
+        <Text as="span" alignSelf="flex-end">
+          Cena:
+          <Text as="span" fontSize="3xl" fontWeight="bold">
+            {" "}
+            {priceString}
+          </Text>
+        </Text>
       </Box>
 
       <ProductImageDisplay

@@ -4,7 +4,7 @@ import { MdPhotoCamera } from "react-icons/md";
 
 import { Camera } from "_components";
 
-const HEADING_TITLE = "Personala \nShelf \nInspector";
+const HEADING_TITLE = "Personal \nShelf \nInspector";
 
 type Props = {
   onPhotoTaken?: (photo: File) => void;

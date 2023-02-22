@@ -8,7 +8,7 @@ type Props = {
   children: ReactNode;
 };
 
-function SettingSwitch(props: Props) {
+export function SettingSwitch(props: Props) {
   const { settingName, children } = props;
 
   const switchId = `${settingName}_elem_id`;
@@ -30,4 +30,3 @@ function SettingSwitch(props: Props) {
   );
 }
 
-export default SettingSwitch;

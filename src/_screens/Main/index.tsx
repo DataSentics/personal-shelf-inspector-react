@@ -50,6 +50,7 @@ function Main() {
             leftIcon={<MdRestartAlt />}
             onClick={resetAll}
             mt={24}
+            mb={12}
           >
             Začít znovu
           </Button>

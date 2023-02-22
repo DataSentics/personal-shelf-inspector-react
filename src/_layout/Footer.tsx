@@ -4,10 +4,10 @@ import {
   Text,
   Link as ChakraLink,
   Stack,
+  useDisclosure,
 } from "@chakra-ui/react";
-
-import { Link } from "_components";
-import { Paths } from "_router";
+import { Modal } from "_components";
+import { AllSettings } from "_features/settings";
 
 const FONT_SIZE = "xs" as const;
 
@@ -19,11 +19,13 @@ type Props = {
 function Footer(props: Props) {
   const { maxWidth, height } = props;
 
+  const modalProps = useDisclosure();
+
   const todayYear = new Date().getFullYear();
 
   return (
     <Box
-      bg="gray.100"
+      bg="blackAlpha.300"
       as="footer"
       position="fixed"
       bottom={0}
@@ -47,11 +49,21 @@ function Footer(props: Props) {
         </Text>
 
         <Stack direction="row">
-          <Text fontSize={FONT_SIZE}>
-            <Link to={Paths.SETTINGS}>Settings</Link>
-          </Text>
+          <Box
+            as={"button"}
+            type="button"
+            role="button"
+            onClick={modalProps.onOpen}
+            fontSize={FONT_SIZE}
+          >
+            Settings
+          </Box>
         </Stack>
       </Container>
+
+      <Modal header="Settings" {...modalProps}>
+        <AllSettings />
+      </Modal>
     </Box>
   );
 }

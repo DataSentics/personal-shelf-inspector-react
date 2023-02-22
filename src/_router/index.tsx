@@ -2,7 +2,6 @@ import { createBrowserRouter } from "react-router-dom";
 import Root from "_layout/Root";
 import Main from "_screens/Main";
 import NotFound from "_screens/NotFound";
-import Settings from "_screens/Settings";
 
 export enum Paths {
   HOME = "/",
@@ -18,10 +17,6 @@ const router = createBrowserRouter([
       {
         path: Paths.HOME,
         element: <Main />,
-      },
-      {
-        path: Paths.SETTINGS,
-        element: <Settings />,
       },
     ],
   },

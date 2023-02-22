@@ -1,6 +1,5 @@
 import { TypedArray } from "@tensorflow/tfjs";
-import { uuid } from "./other";
-import UUID from "./uuid";
+import { getUUID } from "./uuid";
 
 // NEW
 export type BBoxCoordsExact = [number, number, number, number];
@@ -161,7 +160,7 @@ export class ProductBase {
 
   constructor(original: BBox) {
     this.original = new PricetagCoords(original);
-    this._id = uuid();
+    this._id = getUUID();
     // this.collage = new PricetagDetail(collage);
   }
 }

@@ -3,10 +3,6 @@ export function isValidText(value: string | number | undefined) {
   return value || value === 0;
 }
 
-export function uuid() {
-  return crypto.randomUUID();
-}
-
 export class PerfMeter {
   private startTime: number;
   name: string;

@@ -46,6 +46,7 @@ function useImageModel(
       const htmlBody = document.getElementsByTagName("main")[0] as HTMLElement;
       const canvasElem = canvasRef.current;
       htmlBody.appendChild(canvasElem);
+      canvasElem.style.maxWidth = "100%";
 
       return () => {
         htmlBody.removeChild(canvasElem);

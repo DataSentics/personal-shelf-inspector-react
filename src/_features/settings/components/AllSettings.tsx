@@ -1,10 +1,8 @@
-import { Link as RouterLink } from "react-router-dom";
-import { Box, Button } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 
-import { Paths } from "_router";
-import SettingSwitch from "./components/SettingSwitch";
+import { SettingSwitch } from "./SettingSwitch";
 
-function Settings() {
+export function AllSettings() {
   return (
     <Box mt={2}>
       <SettingSwitch settingName="showDebugPhoto">
@@ -26,12 +24,6 @@ function Settings() {
       <SettingSwitch settingName="allowPhotoGallery">
         Allow gallery as camera input
       </SettingSwitch>
-
-      <Button to={Paths.HOME} as={RouterLink} mt={5}>
-        Go back home
-      </Button>
     </Box>
   );
 }
-
-export default Settings;
