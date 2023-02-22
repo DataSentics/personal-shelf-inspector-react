@@ -1,7 +1,9 @@
-import { GraphModel, loadGraphModel } from "@tensorflow/tfjs";
+import type { GraphModel } from "@tensorflow/tfjs";
+import { loadGraphModel } from "@tensorflow/tfjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { drawPredictions } from "_utils/imageProcessing";
-import { executeImageModel, getModelSize, ReshapedOutput } from "_utils/tensor";
+import type { ReshapedOutput } from "_utils/tensor";
+import { executeImageModel, getModelSize } from "_utils/tensor";
 
 type UseModelOptions = {
   isDebug?: boolean; // flag that determines whether to render canvas with predictions

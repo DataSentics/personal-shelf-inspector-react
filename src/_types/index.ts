@@ -1,3 +1,3 @@
-import { TypedArray } from "@tensorflow/tfjs";
+import type { TypedArray } from "@tensorflow/tfjs";
 
 export type Boxes = TypedArray[];

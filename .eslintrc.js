@@ -10,6 +10,8 @@ module.exports = {
     "plugin:react/jsx-runtime",
     "plugin:react-hooks/recommended",
     "plugin:@typescript-eslint/recommended",
+    "plugin:import/typescript",
+    "plugin:prettier/recommended",
     "prettier",
   ],
   overrides: [],
@@ -18,7 +20,7 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
   },
-  plugins: ["react", "jsx-a11y", "@typescript-eslint"],
+  plugins: ["react", "react-hooks", "@typescript-eslint", "import", "prettier"],
   rules: {
     indent: ["error", 2],
     "linebreak-style": ["error", "unix"],
@@ -33,10 +35,17 @@ module.exports = {
       },
     ],
     "prefer-const": ["warn"],
-    // "@typescript-eslint/consistent-type-imports": [
-    //   "error",
-    //   { prefer: "type-imports" },
-    // ],
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      { prefer: "type-imports" },
+    ],
+    "import/order": [
+      "error",
+      {
+        groups: ["builtin", "external", "parent", "sibling", "index"],
+        "newlines-between": "always",
+      },
+    ],
   },
   settings: {
     react: {

@@ -1,5 +1,6 @@
-import { Rank, Tensor } from "@tensorflow/tfjs";
-import { BBoxCoordsExact, Roi } from "./objects";
+import type { Rank, Tensor } from "@tensorflow/tfjs";
+
+import type { BBoxCoordsExact, Roi } from "./objects";
 
 export function tensorsToRois(tensorRanks: Array<Tensor<Rank>>): Array<Roi> {
   //   if (Array.isArray(tensorRanks)) {
@@ -13,7 +14,12 @@ export function tensorsToRois(tensorRanks: Array<Tensor<Rank>>): Array<Roi> {
 
   for (let i = 0; i < validDetections; i += 1) {
     const cordArr = validBoxes.slice(i * 4, i * 4 + 4);
-    const coords: BBoxCoordsExact = [cordArr[0], cordArr[1], cordArr[2], cordArr[3]];
+    const coords: BBoxCoordsExact = [
+      cordArr[0],
+      cordArr[1],
+      cordArr[2],
+      cordArr[3],
+    ];
     const score = validScores[i];
     roiList.push({ coords, score });
   }

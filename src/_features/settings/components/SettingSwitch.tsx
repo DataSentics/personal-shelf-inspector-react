@@ -1,7 +1,7 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { FormControl, FormLabel, Switch } from "@chakra-ui/react";
-
-import { BooleanSettings, useSettingStore } from "_store";
+import type { BooleanSettings } from "_store";
+import { useSettingStore } from "_store";
 
 type Props = {
   settingName: BooleanSettings;
@@ -29,4 +29,3 @@ export function SettingSwitch(props: Props) {
     </FormControl>
   );
 }
-

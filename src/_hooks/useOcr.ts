@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
 import { createWorker } from "tesseract.js";
-
 import { OCR_ENGINE_MODE, OCR_TESSERACT_LANG } from "_constants";
-import { getCanvasFromBox } from "_utils/imageProcessing";
-import { BBox } from "../_utils/objects";
+
+import type { BBox } from "../_utils/objects";
 import { PerfMeter } from "../_utils/other";
 
 const workerPath = "tesseract/worker.min.js";

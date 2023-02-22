@@ -1,4 +1,5 @@
-import { TypedArray } from "@tensorflow/tfjs";
+import type { TypedArray } from "@tensorflow/tfjs";
+
 import { getUUID } from "./uuid";
 
 // NEW

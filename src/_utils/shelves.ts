@@ -2,12 +2,14 @@ import {
   FIND_PRICE_TAG_DISTANCE_TOLERANCE_MULTIPLIER,
   FIND_SHELVES_DEGREE_TOLERANCE,
 } from "_constants";
+
 import {
   findMostCommonAngles,
   getIntersectionWithYFromLine,
   separatePointsIntoLines,
 } from "./geometry";
-import { BBox, getBoxLeftBottom, getPointX } from "./objects";
+import type { BBox } from "./objects";
+import { getBoxLeftBottom, getPointX } from "./objects";
 import { createPairingMap, mean, sortBy } from "./other";
 
 /**

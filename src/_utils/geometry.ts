@@ -1,4 +1,5 @@
-import { getPointX, LinePoints, Point, PointBase } from "./objects";
+import type { LinePoints, PointBase } from "./objects";
+import { getPointX } from "./objects";
 import { sortBy } from "./other";
 
 function getAngle(p1: PointBase, p2: PointBase): number {

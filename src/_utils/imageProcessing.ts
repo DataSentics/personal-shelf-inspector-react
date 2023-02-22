@@ -1,6 +1,6 @@
 // import { GraphModel } from "@tensorflow/tfjs";
 
-import { TypedArray } from "@tensorflow/tfjs";
+import type { TypedArray } from "@tensorflow/tfjs";
 import {
   CANVAS_BG_COLOR,
   CANVAS_FONT,
@@ -8,8 +8,9 @@ import {
   CANVAS_LINE_WIDTH,
   CANVAS_STROKE_COLOR,
 } from "_constants";
+
 import { resizeDimsFit } from "./imageCalcs";
-import { BBox, BBoxCoords } from "./objects";
+import type { BBox, BBoxCoords } from "./objects";
 import { isValidText } from "./other";
 
 export const drawImageToCanvas = (

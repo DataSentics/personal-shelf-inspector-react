@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TypedArray } from "@tensorflow/tfjs";
-
+import type { TypedArray } from "@tensorflow/tfjs";
 import {
   MODEL_NAME_PRICE_PATH,
   MODEL_NAME_PRICE_SIZE,
@@ -8,7 +7,6 @@ import {
   MODEL_PRICETAG_SIZE,
   OCR_MIN_CONFIDENCE,
 } from "_constants";
-
 import { createCollage, denormalizeBoxes } from "_utils/imageCalcs";
 import {
   drawImageToCanvas,
@@ -20,12 +18,12 @@ import {
 import { BBox, PricetagDetail, Product, Rack } from "_utils/objects";
 import { addDetailsToPricetags } from "_utils/pricetags";
 import { findShelves } from "_utils/shelves";
-import { ReshapedOutput } from "_utils/tensor";
+import type { ReshapedOutput } from "_utils/tensor";
+import { createPairingMap, PerfMeter } from "_utils/other";
+import { PRODUCT_NAME_NOT_FOUND } from "_constants/words";
 
 import useOcr from "./useOcr";
 import useImageModel from "./useImageModel";
-import { createPairingMap, PerfMeter } from "_utils/other";
-import { PRODUCT_NAME_NOT_FOUND } from "_constants/words";
 
 type Options = {
   showDebugPhoto?: boolean;

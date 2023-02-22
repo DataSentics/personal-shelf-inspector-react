@@ -1,13 +1,6 @@
-import {
-  browser,
-  GraphModel,
-  image,
-  Rank,
-  Tensor,
-  tidy,
-  TypedArray,
-} from "@tensorflow/tfjs";
-import { Boxes } from "_types";
+import type { GraphModel, Rank, Tensor, TypedArray } from "@tensorflow/tfjs";
+import { browser, image, tidy } from "@tensorflow/tfjs";
+import type { Boxes } from "_types";
 
 export type ReshapedOutput = {
   boxes: Boxes;

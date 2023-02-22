@@ -1,7 +1,6 @@
 import { Box, Button, Heading } from "@chakra-ui/react";
-import { InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes } from "react";
 import { MdPhotoCamera } from "react-icons/md";
-
 import { Camera } from "_components";
 
 const HEADING_TITLE = "Personal \nShelf \nInspector";

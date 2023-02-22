@@ -1,6 +1,5 @@
 import { Box, Button, Heading } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-
 import { Paths } from "_router";
 
 function NotFound() {

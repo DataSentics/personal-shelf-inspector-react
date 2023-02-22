@@ -1,6 +1,5 @@
 import { Box, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 import { isNil } from "remeda";
-
 import type { Product } from "_utils/objects";
 
 type Props = {

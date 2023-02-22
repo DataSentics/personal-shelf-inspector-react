@@ -1,10 +1,6 @@
-import React, {
-  cloneElement,
-  useRef,
-  ReactElement,
-  Children,
-  InputHTMLAttributes,
-} from "react";
+import type { ReactElement, InputHTMLAttributes } from "react";
+import type React from "react";
+import { cloneElement, useRef, Children } from "react";
 
 interface Props {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;

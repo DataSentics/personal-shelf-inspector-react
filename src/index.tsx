@@ -1,14 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
-
 import { ColorModeScript } from "@chakra-ui/react";
+import theme from "_styles/theme";
 
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-
-import theme from "_styles/theme";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
