@@ -61,7 +61,7 @@ function Footer(props: Props) {
         </Stack>
       </Container>
 
-      <Modal header="Settings" {...modalProps}>
+      <Modal {...modalProps} header="Settings" blockScrollOnMount={false}>
         <AllSettings />
       </Modal>
     </Box>

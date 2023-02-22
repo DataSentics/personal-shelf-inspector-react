@@ -265,13 +265,22 @@ function useImageToProducts(
   }, [photoFile]);
 
   useEffect(() => {
+    const imgPhoto = imgPhotoRef.current;
+
+    imgPhoto.onload = startDetection;
+
+    return () => {
+      imgPhoto.onload = null;
+    };
+  }, [startDetection]);
+
+  useEffect(() => {
     if (imageUrl) {
       const imgPhoto = imgPhotoRef.current;
 
       imgPhoto.src = imageUrl;
-      imgPhoto.onload = startDetection;
     }
-  }, [imageUrl, startDetection]);
+  }, [imageUrl]);
 
   const reset = useCallback(() => {
     setImageUrl(undefined);

@@ -64,7 +64,7 @@ function ProductDisplay(props: Props) {
   const { priceMain, priceSub } = product;
 
   const priceString = isNil(priceMain)
-    ? "Nenalenzena"
+    ? "Nedetekována"
     : `${priceMain}.${priceSub ?? 0}${DISPLAY_CURRENCY}`;
 
   return (
