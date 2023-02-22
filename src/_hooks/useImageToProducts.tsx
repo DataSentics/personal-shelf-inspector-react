@@ -20,7 +20,7 @@ import { addDetailsToPricetags } from "_utils/pricetags";
 import { findShelves } from "_utils/shelves";
 import type { ReshapedOutput } from "_utils/tensor";
 import { createPairingMap, PerfMeter } from "_utils/other";
-import { PRODUCT_NAME_NOT_FOUND } from "_constants/words";
+import { PRODUCT_NAME_NOT_FOUND } from "_constants/i18n";
 
 import useOcr from "./useOcr";
 import useImageModel from "./useImageModel";

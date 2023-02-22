@@ -1,6 +1,6 @@
 import { Tabs, TabList, Tab, Stack, Heading } from "@chakra-ui/react";
 import { useState } from "react";
-import { ORDINALS } from "_constants/words";
+import { ORDINALS } from "_constants/i18n";
 import type { Rack } from "_utils/objects";
 
 import ProductDisplay from "./ProductDisplay";
