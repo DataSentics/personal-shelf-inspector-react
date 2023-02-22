@@ -26,7 +26,7 @@ export const useSettingStore = create<SettingState>()(
     { name: "setting-store" }
   )
 );
-export const useSettngStoreValues = () => {
+export const useSettingStoreValues = () => {
   const {
     showDebugPhoto,
     showDebugCollage,

@@ -37,7 +37,7 @@ This webapp is created as PWA so it can be started in offline mode. To accomplis
 
 #### Settings
 
-In footer is link to settings where can be found some settings mostly for debugging purposes.
+In footer is button to settings modal where are most common settings (mostly for debugging purposes)
 
 ## Development
 
@@ -54,24 +54,16 @@ make dev
 ### How to update
 
 - Some configs are hardcoded and can be found in [src/\_constants/index.ts](src/_constants/index.ts)
-- models: can be simply replaced in their location
+- models: can be simply replaced in their location [public/web_models](public/web_models/)
 - tesseract: latest scripts can be rewritten with `make copy-tesseract` command
 - CICD via [GitHub Actions](.github/workflows/azure-static-web-apps-icy-glacier-028ce5a03.yml) when pushed to branch `main`
-
-## Need to be fixed
-
-- sorting products correctly into shelf. WIP can be found under `feat/sort_to_shelves` branch. It's copied and updated from `personal-shelf-native` app. Should be probbaly refuctored & fixed. Now it's randomly sorted
-  - this code was heavily inspired from original ReactNative app for PersonalShelfInspector (so there you can see original code)
-  - now it's completely done in function `guessShelves()` which at the end calls function `quessShelvesMocking()` so it's sorting randomly (so it at least looks somehow usable in GUI). At the end function should add `shelfRank` property and based on this it should sort products. So either I copied code incorrectly, or it's working but I didn't understand purpose of this `shelfRank` variable. Maybe it would be worth to compare output of Native app and after that fix it.
 
 ## What can be improved in the future
 
 - [service-worker](src/service-worker.ts) caching of ML and Tesseract resources on line 75. At the moment it's just basic configuration and could be improved
 - service worker - in [general caching](https://create-react-app.dev/docs/making-a-progressive-web-app/) and ensuring user has latest version available
-- whole line of product name with price could be read together with mobile [TalkBack](https://support.google.com/accessibility/android/answer/6007100?hl=en)
-  - even [non-standard role](https://ux.stackexchange.com/a/125701) `text` didn't help
 - algorithm to sharpen photo before OCR
 - reducing colors in images for OCR
 - running OCR with [multiple workers](https://github.com/naptha/tesseract.js/blob/master/docs/examples.md#with-multiple-workers-to-speed-up)
-- footer sometimes doesn't render perfectly when debug canvas are rendered or with variable URL bar in browser
 - bug: when in development mode with Hot-Reload and OCR is executed again, somehow pricetags and their values can be mixed betweent themselves
+- Tesseract OCR (and also models) not working properly when photo is under angle

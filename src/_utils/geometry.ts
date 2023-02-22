@@ -13,7 +13,7 @@ export function findMostCommonAngles(
   toleranceDegrees: number
 ): Array<number> {
   const angles: Map<string, number> = new Map();
-  const results: Array<number> = [];
+  // const results: Array<number> = [];
 
   for (let i = 0; i < points.length; i++) {
     for (let j = i + 1; j < points.length; j++) {
@@ -32,20 +32,17 @@ export function findMostCommonAngles(
 
   const maxCount = Math.max(...angles.values());
 
-  // Add angles with max count to the results
-  for (const [angle, count] of angles.entries()) {
-    if (count === maxCount) {
-      results.push(Number(angle));
-    }
-  }
+  const mostCommonAngles = [...angles.entries()]
+    .filter(([_angle, count]) => count === maxCount)
+    .map(([angle]) => Number(angle));
 
-  if (results.length !== 1)
+  if (mostCommonAngles.length !== 1)
     console.warn(
-      `There were ${results.length} angles found.` +
+      `There were ${mostCommonAngles.length} angles found.` +
         "There should be only one in majority of cases. n results"
     );
 
-  return results;
+  return mostCommonAngles;
 }
 
 /**

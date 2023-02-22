@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MdRestartAlt } from "react-icons/md";
 import { Button } from "@chakra-ui/react";
-import { useSettngStoreValues } from "_store";
+import { useSettingStoreValues } from "_store";
 import { useImageToProducts } from "_hooks";
 import { RackDisplay } from "_components";
 
@@ -16,7 +16,7 @@ function Main() {
     showCroppedPricetag,
     showCroppedPricetagDetails,
     allowPhotoGallery,
-  } = useSettngStoreValues();
+  } = useSettingStoreValues();
 
   const inputCapture = allowPhotoGallery ? false : "environment";
 
