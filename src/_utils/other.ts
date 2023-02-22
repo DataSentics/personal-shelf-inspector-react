@@ -5,20 +5,32 @@ export function isValidText(value: string | number | undefined) {
 
 export class PerfMeter {
   private startTime: number;
+  private perfApiAvailable: boolean;
   name: string;
 
   constructor(name = "PerfMeter") {
     this.name = name;
-    this.startTime = performance.now();
+
+    this.perfApiAvailable =
+      typeof performance !== "undefined" &&
+      typeof performance.now === "function";
+
+    this.startTime = this.now();
+  }
+
+  private now(): number {
+    return this.perfApiAvailable ? performance.now() : new Date().getTime();
   }
 
   public start(newName?: string) {
-    if (newName) this.name = newName;
-    this.startTime = performance.now();
+    if (newName) {
+      this.name = newName;
+    }
+    this.startTime = this.now();
   }
 
   public end() {
-    const endTime = performance.now();
+    const endTime = this.now();
     const { startTime, name } = this;
 
     const execTime = Math.round(endTime - startTime);
