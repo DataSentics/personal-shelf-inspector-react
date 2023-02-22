@@ -23,10 +23,6 @@ export class Point implements PointBase {
   public get coords() {
     return [this.x, this.y];
   }
-
-  // public sameAs(point: PointBase) {
-  //   return this.x === point.x && this.y === point.y;
-  // }
 }
 
 export type LinePoints = Array<PointBase>;

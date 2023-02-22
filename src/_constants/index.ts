@@ -15,6 +15,7 @@ export const MODEL_PRICETAG_PATH = "/web_models/pricetags/model.json"; // size=6
 // === NamesAndPricesModel ===
 export const MODEL_NAME_PRICE_SIZE: ModelSize = MODEL_SIZES.S_640;
 export const MODEL_NAME_PRICE_PATH = "/web_models/names_and_prices/model.json"; // size=640
+export const COLLAGE_SPACING = 10; // space between price-tags when creating collage for "name&prices" model
 
 // === Canvas ===
 export const CANVAS_BG_COLOR = "#000000";

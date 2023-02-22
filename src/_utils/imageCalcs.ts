@@ -1,7 +1,8 @@
-import { TypedArray } from "@tensorflow/tfjs";
+import { type TypedArray } from "@tensorflow/tfjs";
+import { COLLAGE_SPACING } from "_constants";
 
-const SPACE = 10;
-const TAGS_PER_ROW = 4;
+import { type BBoxCoords } from "./objects";
+import { mean } from "./other";
 
 /**
  * Calculate new dimesions for image we want resize & fit into parent box
@@ -24,24 +25,50 @@ export const resizeDimsFit = (
 };
 
 /**
+ * Calculates how many boxes should be put into one line when creating collage
+ * so final collage dimensions are close to square
+ */
+function calculateRowLength(boxes: BBoxCoords[]): number {
+  // Calculate the total area of all the boxes
+  const extraSpace = Math.round(COLLAGE_SPACING / 2);
+  const totalArea = boxes.reduce(
+    (sum, [x1, y1, x2, y2]) =>
+      sum + (x2 - x1 + extraSpace) * (y2 - y1 + extraSpace),
+    0
+  );
+
+  // Calculate the length of one side of a square with the same area as the total area of the boxes
+  const squareSideLength = Math.sqrt(totalArea);
+
+  // Mean of boxes widths
+  const widthMean = Math.round(mean(boxes.map(([x1, _y1, x2]) => x2 - x1)));
+
+  // Calculate the number of boxes that can fit in a row to make the image as close to a square as possible
+  const rowLength = Math.floor(boxes.length * (widthMean / squareSideLength));
+
+  return rowLength;
+}
+
+/**
  * Fit all boxes into one collage image
  * @param boxes
  * @returns
  */
 export const createCollage = (
-  boxes: (number[] | TypedArray)[],
-  maxSize?: number | false,
-  tagsPerRow = TAGS_PER_ROW
+  boxes: BBoxCoords[],
+  maxSize?: number | false
 ) => {
-  let xPosition = SPACE;
+  const tagsPerRow = calculateRowLength(boxes);
+
+  let xPosition = COLLAGE_SPACING;
   let yPosition = 0;
   let maxHeightInRow = 0;
   let collageWidth = 0;
   let collageBoxes = boxes.map((box, boxIndex) => {
     if (boxIndex % tagsPerRow === 0) {
       collageWidth = Math.max(xPosition, collageWidth);
-      xPosition = SPACE;
-      yPosition += maxHeightInRow + SPACE;
+      xPosition = COLLAGE_SPACING;
+      yPosition += maxHeightInRow + COLLAGE_SPACING;
       maxHeightInRow = 0;
     }
 
@@ -57,14 +84,14 @@ export const createCollage = (
     ];
 
     maxHeightInRow = Math.max(boxHeight, maxHeightInRow);
-    xPosition += boxWidth + SPACE;
+    xPosition += boxWidth + COLLAGE_SPACING;
     // console.log(collageBox);
     return collageBox;
   });
 
   // console.log("collageBoxes", ...collageBoxes);
 
-  let collageHeight = yPosition + maxHeightInRow + SPACE;
+  let collageHeight = yPosition + maxHeightInRow + COLLAGE_SPACING;
   if (maxSize) {
     const { ratio } = resizeDimsFit(
       [collageWidth, collageHeight],
